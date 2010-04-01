@@ -12,8 +12,6 @@
  ondialoghelp="pick('OpenMultiple')"
  buttonlabeldisclosure="+Directory" buttonaccesskeydisclosure="D"
  ondialogdisclosure="pick('GetFolder')"
- buttonaccesskeyaccept="O"
- buttonaccesskeycancel="C"
  ondialogaccept="save()"
  ><script src="uco.js" type="application/javascript;version=1.8"/>
  <tree id="paths" flex="1" editable="true" seltype="single"
@@ -28,11 +26,15 @@
     sortActive="true" persist="width,ordinal,sortDirection,sortActive"/>
   </treecols>
   <treechildren id="children" alternatingbackground="true"
-   ondblclick="dblclick()"/>
+   ondblclick="dblclick(event)" oncontextmenu="return!!toggle()"/>
  </tree>
  <hbox align="center">
   <description flex="1" xmlns:h="http://www.w3.org/1999/xhtml">
-   Shortcut Keys: <h:b>A</h:b>dd <h:b>E</h:b>dit <h:b>D</h:b>elete
+   Shortcut Keys:
+   <h:b>A</h:b>dd /
+   <h:b>E</h:b>dit /
+   <h:b>D</h:b>elete /
+   <h:b>T</h:b>oggle
   </description>
   <button dlgtype="help"/>
   <button dlgtype="disclosure"/>

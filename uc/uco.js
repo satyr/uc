@@ -51,6 +51,14 @@ function remove(row){ try {
   view.selection.select(row - 1);
 } catch(e){ Cu.reportError(e) }
 }
+function toggle(row){ try {
+  if(row == null) row = tree.currentIndex;
+  if(row < 0) return;
+  let p = plist[row];
+  p[1] = +!p[1];
+  treebox.invalidateRow(row);
+} catch(e){ Cu.reportError(e) }
+}
 function edit(shift){
   tree.startEditing(tree.currentIndex, tree.columns[shift | 0]);
 }
@@ -79,19 +87,23 @@ function pick(mode){ try{
 function keydown(ev){
   if(tree.editingColumn) return;
   switch(ev.keyCode){
-    case KeyEvent.DOM_VK_E:
-    case KeyEvent.DOM_VK_F2:
-    case KeyEvent.DOM_VK_SPACE:
-    edit(ev.shiftKey);
+    case KeyEvent.DOM_VK_A:
+    case KeyEvent.DOM_VK_INSERT:
+    add();
     break;
     case KeyEvent.DOM_VK_D:
     case KeyEvent.DOM_VK_DELETE:
     case KeyEvent.DOM_VK_BACK_SPACE:
     remove();
     break;
-    case KeyEvent.DOM_VK_A:
-    case KeyEvent.DOM_VK_INSERT:
-    add();
+    case KeyEvent.DOM_VK_E:
+    case KeyEvent.DOM_VK_F2:
+    case KeyEvent.DOM_VK_SPACE:
+    edit(ev.shiftKey);
+    break;
+    case KeyEvent.DOM_VK_T:
+    case KeyEvent.DOM_VK_PERIOD:
+    toggle();
   }
 }
 function dblclick(){

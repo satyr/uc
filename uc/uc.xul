@@ -4,36 +4,37 @@
 %textcontext;
 ]>
 <dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
- id="options" title="uc" width="800" height="400"
- persist="width,height,screenX,screenY" buttons="extra2,accept,extra1,cancel"
- buttonlabelextra2="Remove" buttonaccesskeyextra2="R"
- ondialogextra2="remove()"
- buttonlabelaccept="++Directory" buttonaccesskeyaccept="D"
- ondialogaccept="add('GetFolder');return false"
- buttonlabelextra1="++Files" buttonaccesskeyextra1="F"
- ondialogextra1="add('OpenMultiple');return false"
- buttonlabelcancel="Close" buttonaccesskeycancel="C"
- defaultButton="cancel"
+ id="options" title="uc" width="400" height="300"
+ persist="width,height,screenX,screenY"
+ buttons="extra2,accept,cancel,disclosure,help"
+ buttonlabelextra2="Remove" buttonaccesskeyextra2="R" ondialogextra2="remove()"
+ buttonlabelhelp="+Files" buttonaccesskeyhelp="F"
+ ondialoghelp="pick('OpenMultiple')"
+ buttonlabeldisclosure="+Directory" buttonaccesskeydisclosure="D"
+ ondialogdisclosure="pick('GetFolder')"
+ buttonaccesskeyaccept="O"
+ buttonaccesskeycancel="C"
+ ondialogaccept="save()"
  ><script src="uco.js" type="application/javascript;version=1.8"/>
- <tree id="paths" flex="1" height="300" seltype="single"
-  hidecolumnpicker="true" onkeydown="keydown(event)"
-  editable="true" context="">
+ <tree id="paths" flex="1" editable="true" seltype="single"
+  hidecolumnpicker="true" onkeydown="keydown(event)">
   <treecols>
    <treecol id="path" label="*" flex="1" editable="true" crop="end"
     sortDirection="ascending" sortActive="true" primary="true"
     ignoreincolumnpicker="true"
     persist="width,ordinal,sortDirection,sortActive"/>
    <splitter class="tree-splitter"/>
-   <treecol id="state" label="&#x2714;" editable="true"
+   <treecol id="flag" label="&#x2714;" editable="true"
     sortActive="true" persist="width,ordinal,sortDirection,sortActive"/>
   </treecols>
-  <treechildren id="children" alternatingbackground="true"/>
+  <treechildren id="children" alternatingbackground="true"
+   ondblclick="dblclick()"/>
  </tree>
- <description class="monospace">
-  &#xa0;
-    edit : E/F2/SPACE (+SHIFT)
- </description>
- <description class="monospace">
-  delete : D/DELETE/BACKSPACE
- </description>
+ <hbox align="center">
+  <description flex="1" xmlns:h="http://www.w3.org/1999/xhtml">
+   Shortcut Keys: <h:b>A</h:b>dd <h:b>E</h:b>dit <h:b>D</h:b>elete
+  </description>
+  <button dlgtype="help"/>
+  <button dlgtype="disclosure"/>
+ </hbox>
 </dialog>

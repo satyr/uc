@@ -143,7 +143,7 @@ function UC_load(win){
   }
   var loaded = [name for each(name in done)];
   if(loaded.length && UC.prefs.get('extensions.uc.log.loaded'))
-    UC_log(href, Date.now() - start + '[ms]\n'+ loaded.join('\n'));
+    UC_log(href, Date.now() - start + 'ms\n'+ loaded.join('\n'));
   return this;
 }
 function UC_loadJS(url, win){
@@ -164,7 +164,7 @@ function UC_lazyp(func, name, args){
   return me;
 }
 function UC_service(c, i) Cc[c].getService(Ci[i]);
-function UC_options() UC.main.openDialog('chrome://uc/content');
+function UC_options() UC.main.openDialog('chrome://uc/content', 'resizable');
 function UC_re(pattern, flags){
   try {
     return RegExp(pattern, flags);

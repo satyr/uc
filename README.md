@@ -6,7 +6,7 @@ In short, [userChrome.js](http://userchromejs.mozdev.org/) + [subscriptoverlaylo
 * Loads only *\*.uc.js* and *\*.uc.xul* (not *userChrome.js*).
 * Lets you specify files/directories to load by setting pref **extensions.uc.paths**
   (path/flag pairs in JSON format).
-  * includes a poor GUI for editing it.
+  * Includes a poor GUI for editing it.
   * If directory, loads all uc scripts under it.
   * The default is a single
     _<[UChrm](https://developer.mozilla.org/index.php?title=en/File_I%2F%2FO)>_
@@ -17,7 +17,10 @@ In short, [userChrome.js](http://userchromejs.mozdev.org/) + [subscriptoverlaylo
 ###differences from subscriptoverlayloader.js
 * Reads meta data only when necessary--on startup or on script update.
 * Supports regex patterns for @include/@exclude by prefixing with '~'.
+* Supports [Greasemonkey](http://wiki.greasespot.net/Metadata_Block#.40require)
+  style @require pragma that accepts a script URL and loads it beforehand.
+  * The URL can be absolute or relative, but must be local.
 
-####bads
+###bads
 * Runs on Firefox 3.5+ only.
-* @require isn't supported (yet).
+* Scamps workaround for <http://bugzil.la/330458>.

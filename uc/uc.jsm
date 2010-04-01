@@ -32,7 +32,8 @@ var EXPORTED_SYMBOLS = ['UC'], UC = {
 
 for(let f in this) if(~f.lastIndexOf('UC_', 0)) UC[f.slice(3)] = this[f];
 
-UC.lazyp(function file2url()(
+UC.lazyp(function file2url() UC_file2url);
+UC_lazyp.call(this, function UC_file2url()(
   UC.IO.getProtocolHandler('file').QueryInterface(Ci.nsIFileProtocolHandler)
   .getURLSpecFromFile));
 
@@ -71,7 +72,7 @@ function UC_log(){
   UC.Console.logStringMessage('uc: ' + Array.join(arguments, ' '));
   return this;
 }
-function UC_data(file){
+function UC_file2data(file){
   var {path, lastModifiedTime} = file, data = UC.bin[path];
   if(data && data.timestamp === lastModifiedTime) return data;
   data = {
@@ -97,7 +98,7 @@ function UC_data(file){
   data.includes.length || data.includes.push(UC.URL_MAIN);
   return UC.bin[path] = data;
 }
-function UC_file(path){
+function UC_path2file(path){
   try {
     let file = UC.localFile;
     file.initWithPath(path);
@@ -120,7 +121,7 @@ function UC_prop2path(q, p) UC.Properties.get(p || q, Ci.nsILocalFile).path;
 function UC_load(win){
   var {href} = win.location, done = {}, start = Date.now();
   for(let [path, on] in new Iterator(UC.paths)) if(on){
-    let file = UC_file(path.replace(UC.RE_PATH_PROP, UC_prop2path));
+    let file = UC_path2file(path.replace(UC.RE_PATH_PROP, UC_prop2path));
     if(!file) continue;
     if(file.isDirectory()){
       let files = file.directoryEntries;
@@ -131,10 +132,10 @@ function UC_load(win){
   function match(url) url.test ? url.test(this) : url == this;
   function touch(file){
     if(file.isDirectory() || !UC.RE_FILE_EXT.test(file.leafName)) return;
-    var ext = RegExp.$1.toUpperCase(), data = UC_data(file);
+    var ext = RegExp.$1.toUpperCase(), data = UC_file2data(file);
     if(data.excludes.some(match, href) ||
        data.includes.some(match, href) ^ 1) return;
-    var url = UC.file2url(file);
+    var url = UC_file2url(file);
     if(url in done) return;
     //ToDo: load requires
     win.setTimeout(UC['load'+ ext], UC['DELAY_'+ ext], url, win);

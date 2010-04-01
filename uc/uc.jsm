@@ -76,7 +76,9 @@ function UC_file2data(file){
   var {path, lastModifiedTime} = file, data = UC.bin[path];
   if(data && data.timestamp === lastModifiedTime) return data;
   data = {
-    timestamp: lastModifiedTime, includes: [], excludes: [], requires: [],
+    timestamp: lastModifiedTime,
+    uri: UC.IO.newURI(UC_file2url(file), null, null),
+    includes: [], excludes: [], requires: [],
   };
   var {fileInputStream: fis, RE_META_PAIR, RE_META_TAIL} = UC;
   var meta = {}, line = {};
@@ -85,9 +87,13 @@ function UC_file2data(file){
   while(fis.readLine(line))
     if(RE_META_PAIR.test(line.value)){
       let {$1, $2} = RegExp;
+      $2 = $2.trimRight();
       switch($1){
-        case 'include': case 'exclude': case 'require':
+        case 'include': case 'exclude':
         data[$1 +'s'].push(UC_tester($2));
+        continue;
+        case 'require':
+        data.requires.push(UC.IO.newURI($2, null, data.uri).spec);
         continue;
       }
       meta[$1] = $1 in meta ? meta[$1] +'\n'+ $2 : $2;
@@ -135,11 +141,14 @@ function UC_load(win){
     var ext = RegExp.$1.toUpperCase(), data = UC_file2data(file);
     if(data.excludes.some(match, href) ||
        data.includes.some(match, href) ^ 1) return;
-    var url = UC_file2url(file);
-    if(url in done) return;
-    //ToDo: load requires
-    win.setTimeout(UC['load'+ ext], UC['DELAY_'+ ext], url, win);
-    done[url] = data.meta.name;
+    var {spec} = data.uri;
+    if(spec in done) return;
+    for each(let rurl in data.requires) if(!(rurl in done)) {
+      UC.loadJS(rurl, win);
+      done[rurl] = '@'+ rurl;
+    }
+    win.setTimeout(UC['load'+ ext], UC['DELAY_'+ ext], spec, win);
+    done[spec] = data.meta.name;
   }
   var loaded = [name for each(name in done)];
   if(loaded.length && UC.prefs.get('extensions.uc.log.loaded'))
@@ -147,9 +156,11 @@ function UC_load(win){
   return this;
 }
 function UC_loadJS(url, win){
-  try { UC.Loader.loadSubScript(url, win) }
-  catch(e){ e === 'stop' || Cu.reportError(e) }
-  return this;
+  try { return UC.Loader.loadSubScript(url, win) }
+  catch(e){
+    if(e !== 'stop') Cu.reportError(e);
+    return e;
+  }
 }
 function UC_loadXUL(url, win){
   win.document.loadOverlay(url, null);

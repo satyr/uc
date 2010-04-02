@@ -33,7 +33,6 @@ var view = {
 };
 
 function add(ps){
-  UC.log(uneval(ps));
   ps = ps || [['<UChrm>', 1]];
   var {length} = plist;
   plist.push.apply(plist, ps);
@@ -42,6 +41,7 @@ function add(ps){
   treebox.ensureRowIsVisible(row);
   treebox.treeBody.focus();
   view.selection.select(row);
+  edit();
 }
 function remove(row){ try {
   if(row == null) row = tree.currentIndex;
@@ -63,8 +63,8 @@ function edit(shift){
   tree.startEditing(tree.currentIndex, tree.columns[shift | 0]);
 }
 function save(){
-  var paths = {};
-  for each(let [k, v] in plist) if(k) paths[k] = v;
+  var paths = {}, re = /[/\\]$/;
+  for each(let [k, v] in plist) if(k) paths[k.trim().replace(re, '')] = v;
   UC.paths = paths;
 }
 function pick(mode){ try{
@@ -104,12 +104,13 @@ function keydown(ev){
     case KeyEvent.DOM_VK_T:
     case KeyEvent.DOM_VK_PERIOD:
     toggle();
+    default: return;
   }
+  ev.preventDefault();
 }
 function dblclick(){
   if(tree.editingColumn) return;
   add();
-  edit();
 }
 
 function onload(){

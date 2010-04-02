@@ -5,7 +5,7 @@
   m:name="uc"
   m:version="20100403"
   m:creator="satyr"
-  m:description="A userChrome.js clone with a built-in subscript/overlay loader."
+  m:description="A userChromeJS clone with a built-in subscript/overlay loader."
   m:optionsURL="chrome://uc/content"
   m:homepageURL="http://github.com/satyr/uc">
    <m:targetApplication><!--Firefox--><Description

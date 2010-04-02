@@ -3,7 +3,6 @@ Cu.import('resource://uc/prefs.jsm');
 
 var EXPORTED_SYMBOLS = ['UC'], UC = {
   URL_MAIN: 'chrome://browser/content/browser.xul',
-  DELAY_JS : 0,
   DELAY_XUL: 333,
   RE_SCAPE: /[.?*+^$|()\{\[\\]/g,
   RE_FILE_EXT : /\.uc\.(js|xul)$/i,
@@ -176,7 +175,7 @@ function UC_lazyp(func, name, args){
   return me;
 }
 function UC_service(c, i) Cc[c].getService(Ci[i]);
-function UC_options() UC.main.openDialog('chrome://uc/content', 'resizable');
+function UC_options() UC.main.openDialog('chrome://uc/content');
 function UC_re(pattern, flags){
   try {
     return RegExp(pattern, flags);

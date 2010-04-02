@@ -4,8 +4,8 @@ name = 'uc.xpi'
 path = 'uc'
 
 with open(path +'/install.rdf', 'r+b') as f:
-  s = re.sub(r'(?<=\bversion=")\d+', 
-             datetime.date.today().strftime('%Y%m%d'), 
+  s = re.sub(r'(?<=\bversion=")\d+',
+             datetime.date.today().strftime('%Y%m%d'),
              f.read())
   f.seek(0)
   f.write(s)

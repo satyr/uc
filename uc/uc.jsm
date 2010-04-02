@@ -147,7 +147,8 @@ function UC_load(win){
       UC.loadJS(rurl, win);
       done[rurl] = '@'+ rurl;
     }
-    win.setTimeout(UC['load'+ ext], UC['DELAY_'+ ext], spec, win);
+    if(ext === 'JS') UC_loadJS(spec, win);
+    else win.setTimeout(UC_loadXUL, UC.DELAY_XUL, spec, win);
     done[spec] = data.meta.name;
   }
   var loaded = [name for each(name in done)];

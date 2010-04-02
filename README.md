@@ -1,6 +1,6 @@
 #uc
 is a Firefox extension that allows you to run arbitrary local scripts in chrome windows.
-In short, [userChrome.js](http://userchromejs.mozdev.org/) + [subscriptoverlayloader.js](http://stashbox.org/26086/subscriptoverlayloader.js).
+In short, [userChromeJS](http://userchromejs.mozdev.org/) + [subscriptoverlayloader.js](http://stashbox.org/26086/subscriptoverlayloader.js).
 
 ###differences from userChrome.js
 * Loads only *\*.uc.js* and *\*.uc.xul* (not *userChrome.js*).

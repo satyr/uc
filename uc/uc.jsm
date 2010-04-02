@@ -152,7 +152,7 @@ function UC_load(win){
     done[spec] = data.meta.name;
   }
   var loaded = [name for each(name in done)];
-  if(loaded.length && UC.prefs.get('extensions.uc.log.loaded'))
+  if(loaded.length && Preferences.get('extensions.uc.log.loaded'))
     UC_log(href, Date.now() - start + 'ms\n'+ loaded.join('\n'));
   return this;
 }

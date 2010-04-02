@@ -25,8 +25,9 @@ var view = {
   cycleHeader: function cycleHeader(col){
     var lmn = col.element;
     var sd = lmn.getAttribute('sortDirection');
-    var dirs = ['ascending', 'descending'];
-    lmn.setAttribute('sortDirection', sd = dirs[(dirs.indexOf(sd) + 1) % 2]);
+    var dirs = ['ascending', 'descending', 'natural'];
+    lmn.setAttribute('sortDirection', sd = dirs[(dirs.indexOf(sd) + 1) % 3]);
+    if(sd === 'natural') return;
     UC.sort(plist, col.index, sd === 'descending');
     treebox.invalidate();
   },
@@ -51,20 +52,18 @@ function remove(row){ try {
   view.selection.select(row - 1);
 } catch(e){ Cu.reportError(e) }
 }
-function toggle(row){ try {
-  if(row == null) row = tree.currentIndex;
+function depth(num){
+  var row = tree.currentIndex;
   if(row < 0) return;
-  let p = plist[row];
-  p[1] = +!p[1];
+  plist[row][1] = num;
   treebox.invalidateRow(row);
-} catch(e){ Cu.reportError(e) }
 }
 function edit(shift){
   tree.startEditing(tree.currentIndex, tree.columns[shift | 0]);
 }
 function save(){
   var paths = {}, re = /[/\\]$/;
-  for each(let [k, v] in plist) if(k) paths[k.trim().replace(re, '')] = v;
+  for each(let [k, v] in plist) if(k) paths[k.trim().replace(re, '')] = v & 15;
   UC.paths = paths;
 }
 function pick(mode){ try{
@@ -80,30 +79,34 @@ function pick(mode){ try{
     let {files} = fp;
     while(files.hasMoreElements())
       ps.push([files.getNext().QueryInterface(Ci.nsIFile).path, 1]);
-  };
+  }
   add(ps);
 } catch(e){ Cu.reportError(e) }}
 
+for(let k in KeyEvent) this[k.slice(6)] = KeyEvent[k];
+
 function keydown(ev){
   if(tree.editingColumn) return;
-  switch(ev.keyCode){
-    case KeyEvent.DOM_VK_A:
-    case KeyEvent.DOM_VK_INSERT:
+  var {keyCode} = ev;
+  switch(keyCode){
+    case (_0 <= keyCode && keyCode <= _9 ||
+          _NUMPAD0 <= keyCode && keyCode <= _NUMPAD9) && keyCode:
+    depth(keyCode % 16);
+    break;
+    case _A:
+    case _INSERT:
     add();
     break;
-    case KeyEvent.DOM_VK_D:
-    case KeyEvent.DOM_VK_DELETE:
-    case KeyEvent.DOM_VK_BACK_SPACE:
+    case _D:
+    case _DELETE:
+    case _BACK_SPACE:
     remove();
     break;
-    case KeyEvent.DOM_VK_E:
-    case KeyEvent.DOM_VK_F2:
-    case KeyEvent.DOM_VK_SPACE:
+    case _E:
+    case _F2:
+    case _SPACE:
     edit(ev.shiftKey);
     break;
-    case KeyEvent.DOM_VK_T:
-    case KeyEvent.DOM_VK_PERIOD:
-    toggle();
     default: return;
   }
   ev.preventDefault();
@@ -114,8 +117,11 @@ function dblclick(){
 }
 
 function onload(){
-  sizeToContent();
   tree = document.getElementById('paths');
   treebox = tree.boxObject;
   tree.view = view;
+}
+
+function onunload(){
+  tree.view = null; // prevents extra getCellText() calls
 }

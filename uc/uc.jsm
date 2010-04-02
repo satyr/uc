@@ -125,14 +125,16 @@ function UC_tester(str){
 function UC_prop2path(q, p) UC.Properties.get(p || q, Ci.nsILocalFile).path;
 function UC_load(win){
   var {href} = win.location, done = {}, start = Date.now();
-  for(let [path, on] in new Iterator(UC.paths)) if(on){
+  for(let [path, depth] in new Iterator(UC.paths)) if(depth > 0){
     let file = UC_path2file(path.replace(UC.RE_PATH_PROP, UC_prop2path));
-    if(!file) continue;
-    if(file.isDirectory()){
-      let files = file.directoryEntries;
-      while(files.hasMoreElements())
-        touch(files.getNext().QueryInterface(Ci.nsILocalFile));
-    } else touch(file);
+    if(file) walk(file, depth);
+  }
+  function walk(file, depth){
+    if(file.isFile()) return touch(file);
+    if(depth < 1) return;
+    let files = file.directoryEntries;
+    while(files.hasMoreElements())
+      walk(files.getNext().QueryInterface(Ci.nsILocalFile), depth - 1);
   }
   function match(url) url.test ? url.test(this) : url == this;
   function touch(file){
@@ -175,7 +177,11 @@ function UC_lazyp(func, name, args){
   return me;
 }
 function UC_service(c, i) Cc[c].getService(Ci[i]);
-function UC_options() UC.main.openDialog('chrome://uc/content');
+function UC_options(){
+  var uc = UC.main.openDialog('chrome://uc/content', 'uc');
+  uc.focus();
+  return uc;
+}
 function UC_re(pattern, flags){
   try {
     return RegExp(pattern, flags);

@@ -127,14 +127,14 @@ function UC_load(win){
   var {href} = win.location, done = {}, start = Date.now();
   for(let [path, depth] in new Iterator(UC.paths)) if(depth > 0){
     let file = UC_path2file(path.replace(UC.RE_PATH_PROP, UC_prop2path));
-    if(file) walk(file, depth);
+    if(file) march(file, depth);
   }
-  function walk(file, depth){
+  function march(file, depth){
     if(file.isFile()) return touch(file);
     if(depth < 1) return;
     let files = file.directoryEntries;
     while(files.hasMoreElements())
-      walk(files.getNext().QueryInterface(Ci.nsILocalFile), depth - 1);
+      march(files.getNext().QueryInterface(Ci.nsILocalFile), depth - 1);
   }
   function match(url) url.test ? url.test(this) : url == this;
   function touch(file){

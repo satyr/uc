@@ -16,8 +16,6 @@ var view = {
   getLevel: function() 0,
   getImageSrc: function() null,
   getRowProperties: function(){},
-  canDropBeforeAfter: function() false,
-  canDrop: function() false,
   getParentIndex: function() -1,
   getCellProperties: function(row, col, props){},
   getColumnProperties: function(){},
@@ -31,9 +29,11 @@ var view = {
     UC.sort(plist, col.index, sd === 'descending');
     treebox.invalidate();
   },
+  canDrop: function(row, orient, dataTransfer) false,
+  drop: function(row, orient, dataTransfer) false,
 };
 
-function add(ps){
+function add(ps, cb){
   ps = ps || [['<UChrm>', 1]];
   var {length} = plist;
   plist.push.apply(plist, ps);
@@ -42,7 +42,7 @@ function add(ps){
   treebox.ensureRowIsVisible(row);
   treebox.treeBody.focus();
   view.selection.select(row);
-  edit();
+  cb && cb();
 }
 function remove(row){ try {
   if(row == null) row = tree.currentIndex;
@@ -95,7 +95,7 @@ function keydown(ev){
     break;
     case _A:
     case _INSERT:
-    add();
+    add(0, edit);
     break;
     case _D:
     case _DELETE:
@@ -113,8 +113,19 @@ function keydown(ev){
 }
 function dblclick(){
   if(tree.editingColumn) return;
-  add();
+  add(0, edit);
 }
+function drag(ev) ev.dataTransfer.types.contains('application/x-moz-file');
+function drop(ev){
+  var dt = ev.dataTransfer, ps = [];
+  for(let i = 0, c = dt.mozItemCount; i < c; ++i){
+    let file = dt.mozGetDataAt('application/x-moz-file', 0);
+    if(file instanceof Ci.nsIFile) ps.push([file.path, 1]);
+  }
+  add(ps);
+}
+
+function hush(ev)(ev.stopPropagation(), ev.preventDefault(), ev);
 
 function onload(){
   tree = document.getElementById('paths');

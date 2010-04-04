@@ -26,6 +26,9 @@
     sortActive="true" persist="width,sortDirection,sortActive"/>
   </treecols>
   <treechildren id="children" alternatingbackground="true"
+   ondragenter="return drag(hush(event))"
+   ondragover ="return drag(hush(event))"
+   ondrop="drop(hush(event))"
    ondblclick="dblclick(event)"/>
  </tree>
  <hbox align="center">

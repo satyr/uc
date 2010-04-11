@@ -29,7 +29,8 @@
    ondragenter="return drag(hush(event))"
    ondragover ="return drag(hush(event))"
    ondrop="drop(hush(event))"
-   ondblclick="dblclick(event)"/>
+   ondblclick="dblclick(event)"
+   context="copy-paste"/>
  </tree>
  <hbox align="center">
   <description flex="1" xmlns:h="http://www.w3.org/1999/xhtml">
@@ -42,4 +43,26 @@
   <button dlgtype="help"/>
   <button dlgtype="disclosure"/>
  </hbox>
+ <popupset id="mainPopupSet">
+  <popup id="copy-paste">
+   <menuitem id="copy" label="Copy" accesskey="c"
+    oncommand="copy()"/>
+   <menuitem id="paste" label="Paste" accesskey="p"
+    oncommand="paste()"/>
+   <menuitem id="copy-all" label="Copy Paths" accesskey="o"
+    oncommand="copy(1)"/>
+   <menuitem id="paste-all" label="Paste Paths" accesskey="a"
+    oncommand="paste(1)"/>
+  </popup>
+ </popupset>
+ <keyset id="mainKeySet">
+  <key id="key-copy" label="copy"
+   modifiers="accel" key="c" oncommand="copy()"/>
+  <key id="key-copy-all" label="copy paths"
+   modifiers="accel,shift" key="c" oncommand="copy(1)"/>
+  <key id="key-paste" label="paste"
+   modifiers="accel" key="v" oncommand="paste()"/>
+  <key id="key-paste-all" label="paste"
+   modifiers="accel,shift" key="v" oncommand="paste(1)"/>
+ </keyset>
 </dialog>

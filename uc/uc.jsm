@@ -52,6 +52,9 @@ for(let [name, ids] in new Iterator({
   WindowMediator:
   ['@mozilla.org/appshell/window-mediator;1',
    'nsIWindowMediator'],
+  Clipboard:
+  ['@mozilla.org/widget/clipboard;1',
+   'nsIClipboard'],
 })) UC.lazyp(UC_service, name, ids);
 
 for(let it in new Iterator({
@@ -61,16 +64,66 @@ for(let it in new Iterator({
   fileInputStream:
   ['@mozilla.org/network/file-input-stream;1',
    'nsIFileInputStream'],
+  transferable:
+  ['@mozilla.org/widget/transferable;1',
+   'nsITransferable'],
 })) let([name, [cid, iid]] = it){
   cid = Cc[cid];
   iid = Ci[iid];
   UC.__defineGetter__(name, function UC_i() cid.createInstance(iid));
 }
 
+var CB = UC.clipb = {
+  flavors: {text: 'text/unicode', html: 'text/html'},
+  get: function CB_get(flavor){
+    const {service, flavors} = CB;
+    const {kGlobalClipboard} = service;
+    function get(flavor){
+      flavor = flavors[flavor] || flavor;
+      if(!service.hasDataMatchingFlavors([flavor], 1, kGlobalClipboard))
+        return '';
+      var trans = UC.transferable, data = {};
+      trans.addDataFlavor(flavor);
+      service.getData(trans, kGlobalClipboard);
+      trans.getTransferData(flavor, data, {});
+      return data.value.QueryInterface(Ci.nsISupportsString).data;
+    }
+    return (
+      arguments.length > 1
+      ? Array.map(arguments, get)
+      : flavor.map ? flavor.map(get) : get(flavor));
+  },
+  set: function CB_set(dict){
+    const {service, flavors} = CB;
+    var trans = UC.transferable;
+    for(let [flavor, data] in new Iterator(dict)){
+      let ss = (Cc['@mozilla.org/supports-string;1']
+                .createInstance(Ci.nsISupportsString));
+      ss.data = data = String(data);
+      trans.addDataFlavor(flavor = flavors[flavor] || flavor);
+      trans.setTransferData(flavor, ss, data.length * 2);
+    }
+    service.setData(trans, null, service.kGlobalClipboard);
+    return this;
+  },
+};
+UC_lazyp.call(CB, function service() UC.Clipboard);
+for(let n in CB.flavors) let(name = n){
+  CB.__defineGetter__(name, function CB_get_flavor() this.get(name));
+  CB.__defineSetter__(name, function CB_set_flavor(data){
+    var dict = {};
+    dict[name] = data;
+    this.set(dict);
+  });
+}
+
 function UC_log(){
   UC.Console.logStringMessage('uc: ' + Array.join(arguments, ' '));
   return this;
 }
+function UC_pile(msg)(
+  UC_log((msg || 'Stack Trace:') +
+         Error().stack.replace(/^[^\n]+\n[^\n]+/, '')));
 function UC_file2data(file){
   var {path, lastModifiedTime} = file, data = UC.bin[path];
   if(data && data.timestamp === lastModifiedTime) return data;
@@ -144,7 +197,7 @@ function UC_load(win){
        data.includes.some(match, href) ^ 1) return;
     var {spec} = data.uri;
     if(spec in done) return;
-    for each(let rurl in data.requires) if(!(rurl in done)) {
+    for each(let rurl in data.requires) if(!(rurl in done)){
       UC.loadJS(rurl, win);
       done[rurl] = '@'+ rurl;
     }
@@ -196,7 +249,7 @@ function UC_sort(arr, key, dsc){
     key != null
     ? function pry(x) x[key]
     : function idt(x) x);
-  var sorted = [{k: pry(x), v: x} for([, x] in new Iterator(arr))].sort(
+  var sorted = [{k: pry(x), v: x} for each(x in Array.slice(arr))].sort(
     dsc
     ? function dsc(a, b) a.k < b.k
     : function asc(a, b) a.k > b.k);

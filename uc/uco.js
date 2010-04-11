@@ -81,7 +81,28 @@ function pick(mode){ try{
       ps.push([files.getNext().QueryInterface(Ci.nsIFile).path, 1]);
   }
   add(ps);
-} catch(e){ Cu.reportError(e) }}
+} catch(e){ Cu.reportError(e) }
+}
+function copy(all){
+  if(all){
+    UC.clipb.text = [path for each([path] in plist)].join('\n');
+    return;
+  }
+  var row = tree.currentIndex;
+  if (~row) UC.clipb.text = plist[row][0];
+}
+function paste(all){
+  var txt = UC.clipb.text.trim();
+  if(!txt) return;
+  if(all){
+    add([[path, 1] for each(path in txt.split(/[\r\n]+/))]);
+    return;
+  }
+  var row = tree.currentIndex;
+  if(row < 0) return;
+  plist[row][0] = txt;
+  treebox.invalidateRow(row);
+}
 
 for(let k in KeyEvent) this[k.slice(6)] = KeyEvent[k];
 

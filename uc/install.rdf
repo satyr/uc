@@ -3,7 +3,7 @@
   ><Description about="urn:mozilla:install-manifest"
   m:id="uc@satyr.github.com"
   m:name="uc"
-  m:version="20100411"
+  m:version="20100426"
   m:creator="satyr"
   m:description="A userChromeJS clone with a built-in subscript/overlay loader."
   m:optionsURL="chrome://uc/content"

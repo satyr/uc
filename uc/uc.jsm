@@ -1,4 +1,5 @@
 const {classes: Cc, interfaces: Ci, utils: Cu, results: Cr} = Components;
+const TO_S = Object.prototype.toString;
 Cu.import('resource://uc/prefs.jsm');
 
 var EXPORTED_SYMBOLS = ['UC'], UC = {
@@ -21,11 +22,11 @@ var EXPORTED_SYMBOLS = ['UC'], UC = {
     __iterator__: function UC_bin_iterator(wk) new Iterator(this, wk),
   }},
   prefs: Preferences,
-  get main UC_get_main()
+  get main()
     UC.WindowMediator.getMostRecentWindow('navigator:browser'),
-  get paths UC_get_paths()
+  get paths()
     JSON.parse(Preferences.get('extensions.uc.paths')),
-  set paths UC_set_paths(ps)
+  set paths(ps)
     Preferences.set('extensions.uc.paths', JSON.stringify(ps)),
 };
 
@@ -121,7 +122,7 @@ function UC_log(){
   UC.Console.logStringMessage('uc: ' + Array.join(arguments, ' '));
   return this;
 }
-function UC_pile(msg)(
+function UC_trace(msg)(
   UC_log((msg || 'Stack Trace:') +
          Error().stack.replace(/^[^\n]+\n[^\n]+/, '')));
 function UC_file2data(file){
@@ -210,16 +211,28 @@ function UC_load(win){
     UC_log(href, Date.now() - start + 'ms\n'+ loaded.join('\n'));
   return this;
 }
-function UC_loadJS(url, win){
-  try { return UC.Loader.loadSubScript(url, win) }
+function UC_loadJS(url, ctx){
+  try { return UC.Loader.loadSubScript(url, ctx.defaultView || ctx) }
   catch(e){
     if(e !== 'stop') Cu.reportError(e);
     return e;
   }
 }
-function UC_loadXUL(url, win){
-  win.document.loadOverlay(url, null);
+function UC_loadXUL(url, ctx){
+  (ctx.document || ctx).loadOverlay(url, null);
   return this;
+}
+function UC_loadCSS(url, ctx){
+  var doc = ctx.document || ctx;
+  return (
+    doc.contentType === 'application/vnd.mozilla.xul+xml'
+    ? doc.insertBefore(
+      doc.createProcessingInstruction(
+        'xml-stylesheet',
+        <_ href={url}/>.toXMLString().slice(3, -2)),
+      doc.documentElement)
+    : doc.body.appendChild(
+      UC_dom({$: 'link', rel: 'stylesheet', href: url}, doc)));
 }
 function UC_lazyp(func, name, args){
   var me = this, p = name == null ? func.name : name;
@@ -255,5 +268,40 @@ function UC_sort(arr, key, dsc){
     : function asc(a, b) a.k > b.k);
   for(let i in sorted) arr[i] = sorted[i].v;
   return arr;
+}
+function UC_dom(obj, ctx){
+  if (obj.nodeType > 0) return obj;
+  var doc = (ctx = ctx || UC.main.document).ownerDocument || ctx;
+  switch(typeof obj){
+    case 'string': return doc.createTextNode(obj);
+    case 'xml':
+    let rng = doc.createRange();
+    if(ctx !== doc) rng.selectNode(ctx);
+    return rng.createContextualFragment(obj.toXMLString());
+  }
+  if(obj.$){
+    let lm = doc.createElement(obj.$);
+    for(let k in new Iterator(obj, true)) switch(k){
+      case '$': break;
+      case '_': lm.appendChild(UC_dom(obj[k], lm)); break;
+      default: lm.setAttribute(k, obj[k]);
+    }
+    return lm;
+  }
+  let df = doc.createDocumentFragment();
+  for each(let v in obj) df.appendChild(UC_dom(v, ctx));
+  return df;
+}
+function UC_type(o) TO_S.call(o).slice(8, -1);
+function UC_once(target, type, listener, capture){
+  function listener1(event){
+    target.removeEventListener(type, listener1, capture);
+    return (
+      typeof listener === "function"
+      ? listener.call(this, event)
+      : listener.handleEvent(event));
+  }
+  target.addEventListener(type, listener1, capture);
+  return listener1;
 }
 function UC_toString() '[object UC]';

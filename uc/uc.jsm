@@ -47,7 +47,7 @@ for(let [name, ids] in new Iterator({
   Loader:
   ['@mozilla.org/moz/jssubscript-loader;1',
    'mozIJSSubScriptLoader'],
-  Properties:
+  Dir:
   ['@mozilla.org/file/directory_service;1',
    'nsIProperties'],
   WindowMediator:
@@ -176,7 +176,7 @@ function UC_tester(str){
   return ss.length === 1 ?
     str : RegExp('^'+ ss.map(UC_rescape).join('.*?') +'$');
 }
-function UC_prop2path(q, p) UC.Properties.get(p || q, Ci.nsILocalFile).path;
+function UC_prop2path(q, p) UC.Dir.get(p || q, Ci.nsILocalFile).path;
 function UC_load(win){
   var {href} = win.location, done = {}, start = Date.now();
   for(let [path, depth] in new Iterator(UC.paths)) if(depth > 0){

@@ -1,6 +1,5 @@
 const {classes: Cc, interfaces: Ci, utils: Cu, results: Cr} = Components;
 const TO_S = Object.prototype.toString;
-Cu.import('resource://uc/prefs.jsm');
 
 var EXPORTED_SYMBOLS = ['UC'], UC = {
   URL_MAIN: 'chrome://browser/content/browser.xul',
@@ -21,14 +20,13 @@ var EXPORTED_SYMBOLS = ['UC'], UC = {
     }},
     __iterator__: function UC_bin_iterator(wk) new Iterator(this, wk),
   }},
-  prefs: Preferences,
-  get main()
-    UC.WindowMediator.getMostRecentWindow('navigator:browser'),
-  get paths()
-    JSON.parse(Preferences.get('extensions.uc.paths')),
-  set paths(ps)
-    Preferences.set('extensions.uc.paths', JSON.stringify(ps)),
+  get main() UC.WindowMediator.getMostRecentWindow('navigator:browser'),
+  get paths() JSON.parse(this.prefs.get('paths')),
+  set paths(ps) this.prefs.set('paths', JSON.stringify(ps)),
 };
+
+Cu.import('resource://uc/prefs.jsm', UC);
+UC.prefs = new UC.Preferences('extensions.uc.');
 
 for(let f in this) if(~f.lastIndexOf('UC_', 0)) UC[f.slice(3)] = this[f];
 
@@ -199,7 +197,7 @@ function UC_load(win){
     var {spec} = data.uri;
     if(spec in done) return;
     for each(let rurl in data.requires) if(!(rurl in done)){
-      UC.loadJS(rurl, win);
+      UC_loadJS(rurl, win);
       done[rurl] = '@'+ rurl;
     }
     if(ext === 'JS') UC_loadJS(spec, win);
@@ -207,7 +205,7 @@ function UC_load(win){
     done[spec] = data.meta.name;
   }
   var loaded = [name for each(name in done)];
-  if(loaded.length && Preferences.get('extensions.uc.log.loaded'))
+  if(loaded.length && UC.prefs.get('log.loaded'))
     UC_log(href, Date.now() - start + 'ms\n'+ loaded.join('\n'));
   return this;
 }

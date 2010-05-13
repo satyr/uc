@@ -7,7 +7,7 @@ UC = userChrome = {
 UC.load(self);
 
 if(location.href === UC.URL_MAIN){
-  if(UC.prefs.get('extensions.uc.sidebar'))
+  if(UC.prefs.get('sidebar'))
     document.getElementById('sidebar').addEventListener(
       'load', function UC_onSidebarLoad(){
         if(this.currentURI.scheme === 'chrome') UC.load(this.contentWindow);

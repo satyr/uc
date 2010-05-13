@@ -16,7 +16,7 @@ var EXPORTED_SYMBOLS = ['UC'], UC = {
     toString: function UC_bin_toString() uneval(this),
     valueOf: function UC_bin_valueOf(hint){ switch(hint){
       case 'object'   : return this;
-      case 'number'   : return this.__count__;
+      case 'number'   : return UC_count(this);
       case 'undefined': return [p for(p in this)].join('\n');
     }},
     __iterator__: function UC_bin_iterator(wk) new Iterator(this, wk),
@@ -303,5 +303,10 @@ function UC_once(target, type, listener, capture){
   }
   target.addEventListener(type, listener1, capture);
   return listener1;
+}
+function UC_count(o){
+  var n = 0;
+  if(o) for([] in new Iterator(o, true)) ++n;
+  return n;
 }
 function UC_toString() '[object UC]';

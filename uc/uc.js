@@ -13,5 +13,8 @@ if(location.href === UC.URL_MAIN){
         if(this.currentURI.scheme === 'chrome') UC.load(this.contentWindow);
       }, true);
   document.getElementById('menu_ToolsPopup').appendChild(UC.dom({
-    $: 'menuitem', label: 'uc', accesskey: 'u', oncommand: 'UC.options()'}));
+    $: 'menuitem', label: 'uc', accesskey: 'u', oncommand: 'UC.options()',
+    class: 'menuitem-iconic',
+    image: 'resource://uc/chrome/icons/default/uc.ico',
+  }));
 }

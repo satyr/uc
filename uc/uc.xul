@@ -4,7 +4,7 @@
 %textcontext;
 ]>
 <dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
- id="options" title="uc" width="400" height="200"
+ id="uc" title="uc" width="400" height="200"
  persist="width,height,screenX,screenY"
  buttons="extra2,accept,cancel,disclosure,help"
  buttonlabelextra2="Remove" buttonaccesskeyextra2="R" ondialogextra2="remove()"

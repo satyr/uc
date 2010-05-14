@@ -15,7 +15,8 @@ In short, [userChromeJS](http://userchromejs.mozdev.org/) + [subscriptoverlayloa
   * Loads only *\*.uc.js* and *\*.uc.xul* (not *userChrome.js*).
 * Targets sidebar windows as well. (e.g. chrome://browser/content/web-panels.xul)
 * Reads meta data only when necessary--on startup or on script update.
-* Supports regex patterns for @include/@exclude by prefixing with `~`.
+* Supports regex patterns for @include/@exclude by
+  [prefixing with `~`](http://gist.github.com/57590).
 * Supports [Greasemonkey](http://wiki.greasespot.net/Metadata_Block#.40require)
   style @require pragma that accepts a script URL and loads it beforehand.
   * The URL can be absolute or relative, but must be local.

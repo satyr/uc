@@ -5,14 +5,17 @@ var EXPORTED_SYMBOLS = ['UC'], UC = {
   URL_MAIN: 'chrome://browser/content/browser.xul',
   DELAY_XUL: 333,
   RE_SCAPE: /[.?*+^$|()\{\[\\]/g,
-  RE_FILE_EXT : /\.uc\.(js|xul)$/i,
+  RE_FILE_EXT : /\.uc\.(js|xul|css)$/i,
   RE_PATH_PROP: /<(\w+)>/,
   RE_META_PAIR: /\@([\w$]+)\s+([^\r\n]+)/,
   RE_META_TAIL: /==\/u/i,
-  NS_HTM: 'http://www.w3.org/1999/xhtml',
-  NS_XUL: 'http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul',
-  bin: {__proto__:{
-    toString: function UC_bin_toString() uneval(this),
+  NS_MATH: 'http://www.w3.org/1998/Math/MathML',
+  NS_HTM : 'http://www.w3.org/1999/xhtml',
+  NS_SVG : 'http://www.w3.org/2000/svg',
+  NS_EM  : 'http://www.mozilla.org/2004/em-rdf#',
+  NS_XUL : 'http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul',
+  bin: {__proto__: {
+    toString: Object.prototype.toSource,
     valueOf: function UC_bin_valueOf(hint){ switch(hint){
       case 'object'   : return this;
       case 'number'   : return UC_count(this);
@@ -132,26 +135,24 @@ function UC_file2data(file){
     includes: [], excludes: [], requires: [],
   };
   var {fileInputStream: fis, RE_META_PAIR, RE_META_TAIL} = UC;
-  var meta = {}, line = {};
+  var meta = data.meta = new Meta, line = {};
   fis.init(file, 0x01, 0444, 0);
   fis.QueryInterface(Ci.nsILineInputStream);
   while(fis.readLine(line))
     if(RE_META_PAIR.test(line.value)){
       let {$1, $2} = RegExp;
       $2 = $2.trimRight();
+      meta[$1] = $1 in meta ? meta[$1] +'\n'+ $2 : $2;
       switch($1){
         case 'include': case 'exclude':
         data[$1 +'s'].push(UC_tester($2));
         continue;
         case 'require':
         data.requires.push(UC.IO.newURI($2, null, data.uri).spec);
-        continue;
       }
-      meta[$1] = $1 in meta ? meta[$1] +'\n'+ $2 : $2;
     } else if(RE_META_TAIL.test(line.value)) break;
   fis.close();
-  if(!meta.name) meta.name = file.leafName;
-  data.meta = meta;
+  'name' in meta || (meta.name = file.leafName);
   data.includes.length || data.includes.push(UC.URL_MAIN);
   return UC.bin[path] = data;
 }
@@ -176,7 +177,7 @@ function UC_tester(str){
 }
 function UC_prop2path(q, p) UC.Dir.get(p || q, Ci.nsILocalFile).path;
 function UC_load(win){
-  var {href} = win.location, done = {}, start = Date.now();
+  var {href} = win.location, done = this.done = {}, start = Date.now();
   for(let [path, depth] in new Iterator(UC.paths)) if(depth > 0){
     let file = UC_path2file(path.replace(UC.RE_PATH_PROP, UC_prop2path));
     if(file) march(file, depth);
@@ -194,19 +195,20 @@ function UC_load(win){
     var ext = RegExp.$1.toUpperCase(), data = UC_file2data(file);
     if(data.excludes.some(match, href) ||
        data.includes.some(match, href) ^ 1) return;
-    var {spec} = data.uri;
+    var {uri: {spec}, meta} = data;
     if(spec in done) return;
-    for each(let rurl in data.requires) if(!(rurl in done)){
-      UC_loadJS(rurl, win);
-      done[rurl] = '@'+ rurl;
-    }
-    if(ext === 'JS') UC_loadJS(spec, win);
-    else win.setTimeout(UC_loadXUL, UC.DELAY_XUL, spec, win);
-    done[spec] = data.meta.name;
+    for each(let rurl in data.requires) done[rurl] = (
+      (rurl in done ? done[rurl] +'\n' : (UC_loadJS(rurl, win), '')) +
+      '-> '+ meta.name);
+    if(ext === 'XUL')
+      win.setTimeout(UC_loadXUL, meta.delay || UC.DELAY_XUL, spec, win);
+    else UC['load'+ ext](spec, win);
+    done[spec] = meta;
   }
-  var loaded = [name for each(name in done)];
-  if(loaded.length && UC.prefs.get('log.loaded'))
-    UC_log(href, Date.now() - start + 'ms\n'+ loaded.join('\n'));
+  if(UC.prefs.get('log.loaded')){
+    let list = [m.name || u +'\n'+ m for([u, m] in new Iterator(done))];
+    list.length && UC_log(href, Date.now() - start + 'ms\n'+ list.join('\n'));
+  }
   return this;
 }
 function UC_loadJS(url, ctx){
@@ -307,4 +309,16 @@ function UC_count(o){
   if(o) for([] in new Iterator(o, true)) ++n;
   return n;
 }
-function UC_toString() '[object UC]';
+function UC_clamp(x, min, max) x < min ? min : x > max ? max : x;
+function UC_toString()(
+  [u +'\n'+ m for([u, m] in new Iterator(this.done || 0))].join('\n\n') ||
+  '[object UC]');
+
+function Meta(){}
+Meta.prototype.toString = function Meta_toString(tab){
+  if(tab == null) tab = ' ';
+  var s = this.name, re = /^/mg;
+  for(let [k, v] in new Iterator(this)) if(k !== 'name')
+     s += '\n@'+ k +'\n'+ v.replace(re, tab);
+  return s;
+};

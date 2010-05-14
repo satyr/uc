@@ -71,7 +71,7 @@ function pick(mode){ try{
   var fp = Cc['@mozilla.org/filepicker;1'].createInstance(nsIFilePicker);
   fp.init(window, 'Add Path', nsIFilePicker['mode'+ mode]);
   var dir = mode === 'GetFolder';
-  dir || fp.appendFilter('uc JS/XUL', '*.uc.js;*.uc.xul');
+  dir || fp.appendFilter('uc JS/XUL/CSS', '*.uc.js;*.uc.xul;*.uc.css');
   if(fp.show() !== nsIFilePicker.returnOK) return;
   var ps = [];
   if(dir) ps.push([fp.file.path, 1]);

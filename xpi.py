@@ -1,12 +1,11 @@
-import os, re, datetime, zipfile
+import sys, os, re, datetime, zipfile
 
-name = 'uc.xpi'
 path = 'uc'
+date = datetime.date.today().strftime('%Y%m%d')
+name = path + date + '.xpi'
 
 with open(path +'/install.rdf', 'r+b') as f:
-  s = re.sub(r'(?<=\bversion=")\d+',
-             datetime.date.today().strftime('%Y%m%d'),
-             f.read())
+  s = re.sub(r'(?<=\bversion=")\d+', date, f.read())
   f.seek(0)
   f.write(s)
 

@@ -27,14 +27,13 @@ var EXPORTED_SYMBOLS = ['UC'], UC = {
   get paths() JSON.parse(this.prefs.get('paths')),
   set paths(ps) this.prefs.set('paths', JSON.stringify(ps)),
 };
-
 Cu.import('resource://uc/prefs.jsm', UC);
 UC.prefs = new UC.Preferences('extensions.uc.');
 
 for(let f in this) if(~f.lastIndexOf('UC_', 0)) UC[f.slice(3)] = this[f];
 
-UC.lazyp(function file2url() UC_file2url);
-UC_lazyp.call(this, function UC_file2url()(
+UC.lazy(function file2url() UC_file2url);
+UC_lazy.call(this, function UC_file2url()(
   UC.IO.getProtocolHandler('file').QueryInterface(Ci.nsIFileProtocolHandler)
   .getURLSpecFromFile));
 
@@ -57,7 +56,13 @@ for(let [name, ids] in new Iterator({
   Clipboard:
   ['@mozilla.org/widget/clipboard;1',
    'nsIClipboard'],
-})) UC.lazyp(UC_service, name, ids);
+  Observer:
+  ['@mozilla.org/observer-service;1',
+   'nsIObserverService'],
+  AppInfo:
+  ['@mozilla.org/xre/app-info;1',
+   'nsIXULRuntime'],
+})) UC.lazy(UC_service, name, ids);
 
 for(let it in new Iterator({
   localFile:
@@ -109,7 +114,7 @@ var CB = UC.clipb = {
     return this;
   },
 };
-UC_lazyp.call(CB, function service() UC.Clipboard);
+UC_lazy.call(CB, function service() UC.Clipboard);
 for(let n in CB.flavors) let(name = n){
   CB.__defineGetter__(name, function CB_get_flavor() this.get(name));
   CB.__defineSetter__(name, function CB_set_flavor(data){
@@ -126,6 +131,7 @@ function UC_log(){
 function UC_trace(msg)(
   UC_log((msg || 'Stack Trace:') +
          Error().stack.replace(/^[^\n]+\n[^\n]+/, '')));
+
 function UC_file2data(file){
   var {path, lastModifiedTime} = file, data = UC.bin[path];
   if(data && data.timestamp === lastModifiedTime) return data;
@@ -165,17 +171,13 @@ function UC_path2file(path){
   } catch(e){ Cu.reportError(e) }
   return null;
 }
-function UC_tester(str){
-  switch(str){
-    case 'main': return UC.URL_MAIN;
-    case '*': return /^/;
-  }
-  if(str[0] === '~') return UC_re(str.slice(1));
-  var ss = str.split('*');
-  return ss.length === 1 ?
-    str : RegExp('^'+ ss.map(UC_rescape).join('.*?') +'$');
-}
 function UC_prop2path(q, p) UC.Dir.get(p || q, Ci.nsILocalFile).path;
+
+function UC_init(win){
+  try { Cu.evalInSandbox('Components.utils', Cu.Sandbox(win)) }
+  catch([]){ return }
+  UC.Loader.loadSubScript('resource://uc/uc.js', win);
+}
 function UC_load(win){
   var {href} = win.location, done = this.done = {}, start = Date.now();
   for(let [path, depth] in new Iterator(UC.paths)) if(depth > 0){
@@ -234,7 +236,8 @@ function UC_loadCSS(url, ctx){
     : doc.body.appendChild(
       UC_dom({$: 'link', rel: 'stylesheet', href: url}, doc)));
 }
-function UC_lazyp(func, name, args){
+
+function UC_lazy(func, name, args){
   var me = this, p = name == null ? func.name : name;
   me.__defineGetter__(p, function lazyProp(){
     delete me[p];
@@ -243,11 +246,22 @@ function UC_lazyp(func, name, args){
   return me;
 }
 function UC_service(c, i) Cc[c].getService(Ci[i]);
+function UC_tester(str){
+  switch(str){
+    case 'main': return UC.URL_MAIN;
+    case '*': return /^/;
+  }
+  if(str[0] === '~') return UC_re(str.slice(1));
+  var ss = str.split('*');
+  return ss.length === 1 ?
+    str : RegExp('^'+ ss.map(UC_rescape).join('.*?') +'$');
+}
 function UC_options(){
   var uc = UC.main.openDialog('chrome://uc/content', 'uc');
   uc.focus();
   return uc;
 }
+
 function UC_re(pattern, flags){
   try {
     return RegExp(pattern, flags);
@@ -310,6 +324,7 @@ function UC_count(o){
   return n;
 }
 function UC_clamp(x, min, max) x < min ? min : x > max ? max : x;
+
 function UC_toString()(
   [u +'\n'+ m for([u, m] in new Iterator(this.done || 0))].join('\n\n') ||
   '[object UC]');

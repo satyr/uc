@@ -1,8 +1,4 @@
 <?xml-stylesheet href="chrome://global/skin"?>
-<!DOCTYPE dialog [
- <!ENTITY % textcontext SYSTEM "chrome://global/locale/textcontext.dtd">
-%textcontext;
-]>
 <dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
  id="uc" title="uc" width="400" height="200"
  persist="width,height,screenX,screenY"
@@ -17,13 +13,14 @@
  <tree id="paths" flex="1" editable="true" seltype="single"
   hidecolumnpicker="true" onkeydown="keydown(event)">
   <treecols style="font-family:monospace">
-   <treecol id="path" label="*/  *.uc.{js,xul}"
-    flex="1" editable="true" crop="end"
-    sortDirection="ascending" sortActive="true"
+   <treecol id="path" label="*.uc.{js,xul,css}  */" tooltiptext="Path"
+    flex="1" crop="center"
+    editable="true" sortActive="true" sortDirection="ascending"
     persist="width,sortDirection,sortActive"/>
    <splitter class="tree-splitter"/>
-   <treecol id="depth" label="&#x21A7;" editable="true"
-    sortActive="true" persist="width,sortDirection,sortActive"/>
+   <treecol id="depth" label="&#x21A7;" tooltiptext="Depth"
+    editable="true" sortActive="true"
+    persist="width,sortDirection,sortActive"/>
   </treecols>
   <treechildren id="children" alternatingbackground="true"
    ondragenter="return drag(hush(event))"
@@ -45,14 +42,14 @@
  </hbox>
  <popupset id="mainPopupSet">
   <popup id="copy-paste">
-   <menuitem id="copy" label="Copy" accesskey="c"
-    oncommand="copy()"/>
-   <menuitem id="paste" label="Paste" accesskey="p"
-    oncommand="paste()"/>
-   <menuitem id="copy-all" label="Copy Paths" accesskey="o"
-    oncommand="copy(1)"/>
-   <menuitem id="paste-all" label="Paste Paths" accesskey="a"
-    oncommand="paste(1)"/>
+   <menuitem id="copy" oncommand="copy()"
+    label="Copy" accesskey="C"/>
+   <menuitem id="paste" oncommand="paste()"
+    label="Paste" accesskey="P"/>
+   <menuitem id="copy-all" oncommand="copy(1)"
+    label="Copy Paths" accesskey="o"/>
+   <menuitem id="paste-all" oncommand="paste(1)"
+    label="Paste Paths" accesskey="a"/>
   </popup>
  </popupset>
  <keyset id="mainKeySet">

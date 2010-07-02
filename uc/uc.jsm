@@ -124,13 +124,20 @@ for(let n in CB.flavors) let(name = n){
 }
 
 function UC_log(){
-  UC.Console.logStringMessage('uc: ' + Array.join(arguments, ' '));
+  if(UC.prefs.get('log'))
+    UC.Console.logStringMessage('uc: ' + Array.join(arguments, ' '));
   return this;
 }
-function UC_trace(msg)(
-  UC_log((msg || 'Stack Trace:') +
-         Error().stack.replace(/^[^\n]+\n[^\n]+/, '')));
-
+function UC_trace(e){
+  if(!e || !UC.prefs.get('log.trace')) return this;
+  if(e instanceof Ci.nsIException){
+    for(var t = '', l = e.location; l; l = l.caller) t += l +'\n';
+    t = t.replace(/^JS frame :: (?:.+ -> )?/mg, '');
+  }
+  else t = e.stack.replace(/@.+ -> /g, '@');
+  if(t) UC_log('Stack Trace:\n'+ t);
+  return this;
+}
 function UC_file2data(file){
   var {path, lastModifiedTime} = file, data = UC.bin[path];
   if(data && data.timestamp === lastModifiedTime) return data;
@@ -215,7 +222,10 @@ function UC_load(win){
 function UC_loadJS(url, ctx){
   try { return UC.Loader.loadSubScript(url, ctx.defaultView || ctx) }
   catch(e){
-    if(e !== 'stop') Cu.reportError(e);
+    if(e !== 'stop'){
+      Cu.reportError(e);
+      UC_trace(e);
+    }
     return e;
   }
 }

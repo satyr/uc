@@ -1,5 +1,4 @@
 const {classes: Cc, interfaces: Ci, utils: Cu, results: Cr} = Components;
-const TO_S = Object.prototype.toString;
 
 var EXPORTED_SYMBOLS = ['UC'], UC = {
   URL_MAIN: 'chrome://browser/content/browser.xul',
@@ -167,7 +166,7 @@ function UC_path2file(path){
     let file = UC.localFile;
     file.initWithPath(path);
     if(file.exists()) return file;
-    UC_log('bad file: ' + path);
+    UC_log('bad file: '+ path);
   } catch(e){ Cu.reportError(e) }
   return null;
 }
@@ -306,24 +305,11 @@ function UC_dom(obj, ctx){
   for each(let v in obj) df.appendChild(UC_dom(v, ctx));
   return df;
 }
-function UC_type(o) TO_S.call(o).slice(8, -1);
-function UC_once(target, type, listener, capture){
-  function listener1(event){
-    target.removeEventListener(type, listener1, capture);
-    return (
-      typeof listener === "function"
-      ? listener.call(this, event)
-      : listener.handleEvent(event));
-  }
-  target.addEventListener(type, listener1, capture);
-  return listener1;
-}
 function UC_count(o){
   var n = 0;
   if(o) for([] in new Iterator(o, true)) ++n;
   return n;
 }
-function UC_clamp(x, min, max) x < min ? min : x > max ? max : x;
 
 function UC_toString()(
   [u +'\n'+ m for([u, m] in new Iterator(this.done || 0))].join('\n\n') ||

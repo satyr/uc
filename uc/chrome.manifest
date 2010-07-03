@@ -2,3 +2,7 @@ content  uc .
 resource uc .
 skin uc skin .
 locale uc en-US locale/en-US/
+
+component {98c6d8bf-3eae-4e3f-8dc8-f91794e9782a} components/ucc.js
+contract @u/c;1 {98c6d8bf-3eae-4e3f-8dc8-f91794e9782a}
+category profile-after-change UCC @u/c;1

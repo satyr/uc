@@ -6,7 +6,7 @@ var EXPORTED_SYMBOLS = ['UC'], UC = {
   RE_SCAPE: /[.?*+^$|()\{\[\\]/g,
   RE_FILE_EXT : /\.uc\.(js|xul|css)$/i,
   RE_PATH_PROP: /<(\w+)>/,
-  RE_META_PAIR: /\@([\w$]+)\s+([^\r\n]+)/,
+  RE_META_PAIR: /\@([\w$]+)\s+(.+)/,
   RE_META_TAIL: /==\/u/i,
   NS_MATH: 'http://www.w3.org/1998/Math/MathML',
   NS_HTM : 'http://www.w3.org/1999/xhtml',
@@ -208,7 +208,7 @@ function UC_load(win){
     for each(let rurl in data.requires) done[rurl] = (
       (rurl in done ? done[rurl] +'\n' : (UC_loadJS(rurl, win), '')) +
       '-> '+ meta.name);
-    if(ext === 'XUL')
+    if(ext == 'XUL')
       win.setTimeout(UC_loadXUL, meta.delay || UC.DELAY_XUL, spec, win);
     else UC['load'+ ext](spec, win);
     done[spec] = meta;
@@ -236,7 +236,7 @@ function UC_loadXUL(url, ctx){
 function UC_loadCSS(url, ctx){
   var doc = ctx.document || ctx;
   return (
-    doc.contentType === 'application/vnd.mozilla.xul+xml'
+    doc.contentType == 'application/vnd.mozilla.xul+xml'
     ? doc.insertBefore(
       doc.createProcessingInstruction(
         'xml-stylesheet',
@@ -260,9 +260,9 @@ function UC_tester(str){
     case 'main': return UC.URL_MAIN;
     case '*': return /^/;
   }
-  if(str[0] === '~') return UC_re(str.slice(1));
+  if(str[0] == '~') return UC_re(str.slice(1));
   var ss = str.split('*');
-  return ss.length === 1 ?
+  return ss.length == 1 ?
     str : RegExp('^'+ ss.map(UC_rescape).join('.*?') +'$');
 }
 function UC_options(){
@@ -281,7 +281,7 @@ function UC_re(pattern, flags){
 function UC_rescape(str) String(str).replace(UC.RE_SCAPE, '\\$&');
 function UC_sort(arr, key, dsc){
   var pry = (
-    typeof key === 'function' ? key :
+    typeof key == 'function' ? key :
     key != null
     ? function pry(x) x[key]
     : function idt(x) x);

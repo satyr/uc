@@ -12,5 +12,5 @@
   <m:targetApplication><!--Firefox--><Description
    m:id="{ec8030f7-c20a-464f-9b0e-13a3a9e97384}"
    m:minVersion="3.5"
-   m:maxVersion="4.0b3pre"
+   m:maxVersion="4.0b4pre"
    /></m:targetApplication></Description></RDF>

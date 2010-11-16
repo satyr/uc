@@ -1,9 +1,9 @@
 const {classes: Cc, interfaces: Ci, utils: Cu, results: Cr} = Components;
 
-var EXPORTED_SYMBOLS = ['UC'], UC = {
-  URL_MAIN: 'chrome://browser/content/browser.xul',
+this[this.EXPORTED_SYMBOLS = ['UC']] = {
+  URL_MAIN : 'chrome://browser/content/browser.xul',
   DELAY_XUL: 333,
-  RE_SCAPE: /[.?*+^$|()\{\[\\]/g,
+  RE_SCAPE : /[.?*+^$|()\{\[\\]/g,
   RE_FILE_EXT : /\.uc\.(js|xul|css)$/i,
   RE_PATH_PROP: /<(\w+)>/,
   RE_META_PAIR: /\@([\w$]+)\s+(.+)/,
@@ -220,8 +220,9 @@ function UC_load(win){
   return this;
 }
 function UC_loadJS(url, ctx){
-  try { return UC.Loader.loadSubScript(url, ctx.defaultView || ctx) }
-  catch(e){
+  try {
+    return UC.Loader.loadSubScript(url, ctx.defaultView || ctx, 'utf-8');
+  } catch(e){
     if(e !== 'stop'){
       Cu.reportError(e);
       UC_trace(e);

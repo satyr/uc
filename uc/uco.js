@@ -52,6 +52,13 @@ function remove(row){ try {
   view.selection.select(row - 1)
 } catch(e){ Cu.reportError(e) }
 }
+function move(up){
+  var row = tree.currentIndex
+  if(up ? row < 1 : plist.length - 2 < row) return
+  var her = row - (up ? 1 : -1)
+  ;[plist[her], plist[row]] = [plist[row], plist[her]]
+  view.selection.select(her)
+}
 function depth(num){
   var row = tree.currentIndex
   if(row < 0) return
@@ -108,27 +115,28 @@ for(let k in KeyEvent) this[k.slice(6)] = KeyEvent[k]
 
 function keydown(ev){
   if(tree.editingColumn) return
-  var {keyCode} = ev
-  switch(keyCode){
-  case (_0 <= keyCode && keyCode <= _9 ||
-        _NUMPAD0 <= keyCode && keyCode <= _NUMPAD9) && keyCode:
-    depth(keyCode % 16)
-    break
-  case _A:
-  case _INSERT:
+  var key = ev.keyCode
+  switch(key){
+  case _A: case _INSERT:
     add(0, edit)
     break
-  case _D:
-  case _DELETE:
-  case _BACK_SPACE:
+  case _R: case _DELETE: case _BACK_SPACE:
     remove()
     break
-  case _E:
-  case _F2:
-  case _SPACE:
+  case _E: case _F2: case _SPACE:
     edit(ev.shiftKey)
     break
-    default: return
+  case _UP: case _DOWN:
+    if(!ev.ctrlKey) return
+    move(key === _UP)
+    break
+  case _U: case _D:
+    move(key === _U)
+    break
+  case (_0 <= key && key <= _9 || _NUMPAD0 <= key && key <= _NUMPAD9) && key:
+    depth(key % 16)
+    break
+  default: return
   }
   ev.preventDefault()
 }

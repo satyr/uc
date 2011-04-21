@@ -32,10 +32,12 @@
  <hbox align="center">
   <description flex="1" xmlns:h="http://www.w3.org/1999/xhtml">
    Shortcut Keys:
-   <h:b>A</h:b>dd /
-   <h:b>E</h:b>dit /
-   <h:b>D</h:b>elete /
-   <h:b>0</h:b> to <h:b>9</h:b>
+     <h:b>A</h:b>dd
+   / <h:b>E</h:b>dit
+   / <h:b>R</h:b>move
+   / <h:b>U</h:b>p
+   / <h:b>D</h:b>own
+   / <h:b>0</h:b> to <h:b>9</h:b>
   </description>
   <button dlgtype="help"/>
   <button dlgtype="disclosure"/>

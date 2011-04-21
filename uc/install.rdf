@@ -8,9 +8,9 @@
  m:description="userChromeJS + subscriptoverlayloader.js + ?"
  m:iconURL="chrome://uc/content/chrome/icons/default/uc.ico"
  m:optionsURL="chrome://uc/content"
- m:homepageURL="http://github.com/satyr/uc">
-  <m:targetApplication><!--Firefox--><Description
+ m:homepageURL="http://github.com/satyr/uc"
+ ><m:targetApplication><!--Firefox--><Description
    m:id="{ec8030f7-c20a-464f-9b0e-13a3a9e97384}"
    m:minVersion="3.5"
-   m:maxVersion="4.0b8pre"
+   m:maxVersion="6.0a1"
    /></m:targetApplication></Description></RDF>

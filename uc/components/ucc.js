@@ -1,9 +1,9 @@
-const Cu = Components.utils;
-Cu.import('resource://gre/modules/XPCOMUtils.jsm');
+const Cu = Components.utils
+Cu.import('resource://gre/modules/XPCOMUtils.jsm')
 
 function UCC(){
-  Cu.import('resource://uc/uc.jsm');
-  UC.Observer.addObserver(this, 'domwindowopened', false);
+  Cu.import('resource://uc/uc.jsm')
+  UC.Observer.addObserver(this, 'domwindowopened', false)
 }
 UCC.prototype = {
   classDescription: 'uc boot',
@@ -14,7 +14,7 @@ UCC.prototype = {
   observe: function UCC_onWindowOpen(win)
     win && win.addEventListener('load', this, true),
   handleEvent: function UCC_onDocumentLoad(ev) UC.init(ev.target.defaultView),
-};
+}
 for each(let x in ['Factory', 'Module']) try {
-  this['NSGet'+ x] = XPCOMUtils['generateNSGet'+ x]([UCC]);
+  this['NSGet'+ x] = XPCOMUtils['generateNSGet'+ x]([UCC])
 } catch([]){}

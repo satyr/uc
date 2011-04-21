@@ -1,13 +1,13 @@
-const {classes: Cc, interfaces: Ci, utils: Cu, results: Cr} = Components;
-Cu.import('resource://uc/uc.jsm');
+const {classes: Cc, interfaces: Ci, utils: Cu, results: Cr} = Components
+Cu.import('resource://uc/uc.jsm')
 
-var plist = [p for(p in new Iterator(UC.paths))];
+var plist = [p for(p in new Iterator(UC.paths))]
 var view = {
   setTree: function(treebox){ this.treebox = treebox },
   get rowCount() plist.length,
   getCellText: function(row, col) plist[row][col.index],
   setCellText: function(row, col, txt){
-    plist[row][col.index] = txt.trim();
+    plist[row][col.index] = txt.trim()
   },
   isEditable: function() true,
   isContainer: function() false,
@@ -21,139 +21,139 @@ var view = {
   getColumnProperties: function(){},
   selectionChanged: function(){},
   cycleHeader: function cycleHeader(col){
-    var lmn = col.element;
-    var sd = lmn.getAttribute('sortDirection');
-    var dirs = ['ascending', 'descending', 'natural'];
-    lmn.setAttribute('sortDirection', sd = dirs[(dirs.indexOf(sd) + 1) % 3]);
-    if(sd === 'natural') return;
-    UC.sort(plist, col.index, sd === 'descending');
-    treebox.invalidate();
+    var lmn = col.element
+    var sd = lmn.getAttribute('sortDirection')
+    var dirs = ['ascending', 'descending', 'natural']
+    lmn.setAttribute('sortDirection', sd = dirs[(dirs.indexOf(sd) + 1) % 3])
+    if(sd === 'natural') return
+    UC.sort(plist, col.index, sd === 'descending')
+    treebox.invalidate()
   },
   canDrop: function(row, orient, dataTransfer) false,
   drop: function(row, orient, dataTransfer) false,
-};
+}
 
 function add(ps, cb){
-  ps = ps || [['<UChrm>', 1]];
-  var {length} = plist;
-  plist.push.apply(plist, ps);
-  treebox.rowCountChanged(length - 1, ps.length);
-  var row = plist.length - 1;
-  treebox.ensureRowIsVisible(row);
-  treebox.treeBody.focus();
-  view.selection.select(row);
-  cb && cb();
+  ps = ps || [['<UChrm>', 1]]
+  var {length} = plist
+  plist.push.apply(plist, ps)
+  treebox.rowCountChanged(length - 1, ps.length)
+  var row = plist.length - 1
+  treebox.ensureRowIsVisible(row)
+  treebox.treeBody.focus()
+  view.selection.select(row)
+  cb && cb()
 }
 function remove(row){ try {
-  if(row == null) row = tree.currentIndex;
-  if(row < 0) return;
-  plist.splice(row, 1);
-  treebox.rowCountChanged(row, -1);
-  view.selection.select(row - 1);
+  if(row == null) row = tree.currentIndex
+  if(row < 0) return
+  plist.splice(row, 1)
+  treebox.rowCountChanged(row, -1)
+  view.selection.select(row - 1)
 } catch(e){ Cu.reportError(e) }
 }
 function depth(num){
-  var row = tree.currentIndex;
-  if(row < 0) return;
-  plist[row][1] = num;
-  treebox.invalidateRow(row);
+  var row = tree.currentIndex
+  if(row < 0) return
+  plist[row][1] = num
+  treebox.invalidateRow(row)
 }
 function edit(shift){
-  tree.startEditing(tree.currentIndex, tree.columns[shift | 0]);
+  tree.startEditing(tree.currentIndex, tree.columns[shift | 0])
 }
 function save(){
-  var paths = {}, re = /[/\\]$/;
-  for each(let [k, v] in plist) if(k) paths[k.trim().replace(re, '')] = v & 15;
-  UC.paths = paths;
+  var paths = {}, re = /[/\\]$/
+  for each(let [k, v] in plist) if(k) paths[k.trim().replace(re, '')] = v & 15
+  UC.paths = paths
 }
 function pick(mode){ try{
-  const {nsIFilePicker} = Ci;
-  var fp = Cc['@mozilla.org/filepicker;1'].createInstance(nsIFilePicker);
-  fp.init(window, 'Add Path', nsIFilePicker['mode'+ mode]);
-  var dir = mode === 'GetFolder';
-  dir || fp.appendFilter('uc JS/XUL/CSS', '*.uc.js;*.uc.xul;*.uc.css');
-  if(fp.show() !== nsIFilePicker.returnOK) return;
-  var ps = [];
-  if(dir) ps.push([fp.file.path, 1]);
+  const {nsIFilePicker} = Ci
+  var fp = Cc['@mozilla.org/filepicker;1'].createInstance(nsIFilePicker)
+  fp.init(window, 'Add Path', nsIFilePicker['mode'+ mode])
+  var dir = mode === 'GetFolder'
+  dir || fp.appendFilter('uc JS/XUL/CSS', '*.uc.js;*.uc.xul;*.uc.css')
+  if(fp.show() !== nsIFilePicker.returnOK) return
+  var ps = []
+  if(dir) ps.push([fp.file.path, 1])
   else {
-    let {files} = fp;
+    let {files} = fp
     while(files.hasMoreElements())
-      ps.push([files.getNext().QueryInterface(Ci.nsIFile).path, 1]);
+      ps.push([files.getNext().QueryInterface(Ci.nsIFile).path, 1])
   }
-  add(ps);
+  add(ps)
 } catch(e){ Cu.reportError(e) }
 }
 function copy(all){
   if(all){
-    UC.clipb.text = [path for each([path] in plist)].join('\n');
-    return;
+    UC.clipb.text = [path for each([path] in plist)].join('\n')
+    return
   }
-  var row = tree.currentIndex;
-  if (~row) UC.clipb.text = plist[row][0];
+  var row = tree.currentIndex
+  if(~row) UC.clipb.text = plist[row][0]
 }
 function paste(all){
-  var txt = UC.clipb.text.trim();
-  if(!txt) return;
+  var txt = UC.clipb.text.trim()
+  if(!txt) return
   if(all){
-    add([[path, 1] for each(path in txt.split(/[\r\n]+/))]);
-    return;
+    add([[path, 1] for each(path in txt.split(/[\r\n]+/))])
+    return
   }
-  var row = tree.currentIndex;
-  if(row < 0) return;
-  plist[row][0] = txt;
-  treebox.invalidateRow(row);
+  var row = tree.currentIndex
+  if(row < 0) return
+  plist[row][0] = txt
+  treebox.invalidateRow(row)
 }
 
-for(let k in KeyEvent) this[k.slice(6)] = KeyEvent[k];
+for(let k in KeyEvent) this[k.slice(6)] = KeyEvent[k]
 
 function keydown(ev){
-  if(tree.editingColumn) return;
-  var {keyCode} = ev;
+  if(tree.editingColumn) return
+  var {keyCode} = ev
   switch(keyCode){
-    case (_0 <= keyCode && keyCode <= _9 ||
-          _NUMPAD0 <= keyCode && keyCode <= _NUMPAD9) && keyCode:
-    depth(keyCode % 16);
-    break;
-    case _A:
-    case _INSERT:
-    add(0, edit);
-    break;
-    case _D:
-    case _DELETE:
-    case _BACK_SPACE:
-    remove();
-    break;
-    case _E:
-    case _F2:
-    case _SPACE:
-    edit(ev.shiftKey);
-    break;
-    default: return;
+  case (_0 <= keyCode && keyCode <= _9 ||
+        _NUMPAD0 <= keyCode && keyCode <= _NUMPAD9) && keyCode:
+    depth(keyCode % 16)
+    break
+  case _A:
+  case _INSERT:
+    add(0, edit)
+    break
+  case _D:
+  case _DELETE:
+  case _BACK_SPACE:
+    remove()
+    break
+  case _E:
+  case _F2:
+  case _SPACE:
+    edit(ev.shiftKey)
+    break
+    default: return
   }
-  ev.preventDefault();
+  ev.preventDefault()
 }
 function dblclick(){
-  if(tree.editingColumn) return;
-  add(0, edit);
+  if(tree.editingColumn) return
+  add(0, edit)
 }
-function drag(ev) ev.dataTransfer.types.contains('application/x-moz-file');
+function drag(ev) ev.dataTransfer.types.contains('application/x-moz-file')
 function drop(ev){
-  var dt = ev.dataTransfer, ps = [];
+  var dt = ev.dataTransfer, ps = []
   for(let i = 0, c = dt.mozItemCount; i < c; ++i){
-    let file = dt.mozGetDataAt('application/x-moz-file', 0);
-    if(file instanceof Ci.nsIFile) ps.push([file.path, 1]);
+    let file = dt.mozGetDataAt('application/x-moz-file', 0)
+    if(file instanceof Ci.nsIFile) ps.push([file.path, 1])
   }
-  add(ps);
+  add(ps)
 }
 
-function hush(ev)(ev.stopPropagation(), ev.preventDefault(), ev);
+function hush(ev)(ev.stopPropagation(), ev.preventDefault(), ev)
 
 function onload(){
-  tree = document.getElementById('paths');
-  treebox = tree.boxObject;
-  tree.view = view;
+  tree = document.getElementById('paths')
+  treebox = tree.boxObject
+  tree.view = view
 }
 
 function onunload(){
-  tree.view = null; // prevents extra getCellText() calls
+  tree.view = null // prevents extra getCellText() calls
 }

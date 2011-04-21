@@ -1,4 +1,4 @@
-<?xml-stylesheet href="chrome://global/skin"?>
+<?xml-stylesheet href="chrome://global/skin/"?>
 <dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
  id="uc" title="uc" width="400" height="200"
  persist="width,height,screenX,screenY"
@@ -41,7 +41,7 @@
   <button dlgtype="disclosure"/>
  </hbox>
  <popupset id="mainPopupSet">
-  <popup id="copy-paste">
+  <menupopup id="copy-paste">
    <menuitem id="copy" oncommand="copy()"
     label="Copy" accesskey="C"/>
    <menuitem id="paste" oncommand="paste()"
@@ -50,7 +50,7 @@
     label="Copy Paths" accesskey="o"/>
    <menuitem id="paste-all" oncommand="paste(1)"
     label="Paste Paths" accesskey="a"/>
-  </popup>
+  </menupopup>
  </popupset>
  <keyset id="mainKeySet">
   <key id="key-copy" label="copy"

@@ -32,9 +32,9 @@ UC.prefs = new UC.Preferences('extensions.uc.')
 for(let f in this) if(~f.lastIndexOf('UC_', 0)) UC[f.slice(3)] = this[f]
 
 UC.lazy(function file2url() UC_file2url)
-UC_lazy.call(this, function UC_file2url()(
+UC_lazy.call(this, function UC_file2url()
   UC.IO.getProtocolHandler('file').QueryInterface(Ci.nsIFileProtocolHandler)
-  .getURLSpecFromFile))
+  .getURLSpecFromFile)
 
 for(let [name, ids] in new Iterator({
   IO:
@@ -103,8 +103,8 @@ var CB = UC.clipb = {
     const {service, flavors} = CB
     var trans = UC.transferable
     for(let [flavor, data] in new Iterator(dict)){
-      let ss = (Cc['@mozilla.org/supports-string;1']
-                .createInstance(Ci.nsISupportsString))
+      let ss = Cc['@mozilla.org/supports-string;1']
+               .createInstance(Ci.nsISupportsString)
       ss.data = data = String(data)
       trans.addDataFlavor(flavor = flavors[flavor] || flavor)
       trans.setTransferData(flavor, ss, data.length * 2)

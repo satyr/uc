@@ -3,7 +3,7 @@
  ><Description about="urn:mozilla:install-manifest"
  m:id="uc@satyr.github.com"
  m:name="uc"
- m:version="20100703"
+ m:version="20110421"
  m:creator="satyr"
  m:description="userChromeJS + subscriptoverlayloader.js + ?"
  m:iconURL="chrome://uc/content/chrome/icons/default/uc.ico"

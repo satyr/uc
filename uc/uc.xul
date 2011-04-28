@@ -2,12 +2,8 @@
 <dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
  id="uc" title="uc" width="400" height="200"
  persist="width,height,screenX,screenY"
- buttons="extra2,accept,cancel,disclosure,help"
+ buttons="extra2,accept,cancel"
  buttonlabelextra2="Remove" buttonaccesskeyextra2="R" ondialogextra2="remove()"
- buttonlabelhelp="+Files" buttonaccesskeyhelp="F"
- ondialoghelp="pick('OpenMultiple')"
- buttonlabeldisclosure="+Directory" buttonaccesskeydisclosure="D"
- ondialogdisclosure="pick('GetFolder')"
  ondialogaccept="save()"
  ><script src="uco.js" type="application/javascript;version=1.8"/>
  <tree id="paths" flex="1" editable="true" seltype="single"
@@ -39,8 +35,10 @@
    / <h:b>D</h:b>own
    / <h:b>0</h:b> to <h:b>9</h:b>
   </description>
-  <button dlgtype="help"/>
-  <button dlgtype="disclosure"/>
+  <button label="+Files" accesskey="F"
+   oncommand="pick('OpenMultiple')"/>
+  <button label="+Directory" accesskey="D"
+   oncommand="pick('GetFolder')"/>
  </hbox>
  <popupset id="mainPopupSet">
   <menupopup id="copy-paste">

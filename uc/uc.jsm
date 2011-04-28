@@ -192,7 +192,7 @@ function UC_load(win){
   }
   function march(file, depth){
     if(file.isFile()) return touch(file)
-    if(depth < 1) return
+    if(depth < 1 || file.leafName[0] == '.') return
     let files = file.directoryEntries
     while(files.hasMoreElements())
       march(files.getNext().QueryInterface(Ci.nsILocalFile), depth - 1)

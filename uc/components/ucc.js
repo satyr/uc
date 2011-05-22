@@ -1,8 +1,9 @@
-const Cu = Components.utils
-Cu.import('resource://gre/modules/XPCOMUtils.jsm')
+'use strict'
+
+Components.utils.import('resource://gre/modules/XPCOMUtils.jsm')
 
 function UCC(){
-  Cu.import('resource://uc/uc.jsm')
+  Components.utils.import('resource://uc/uc.jsm')
   UC.Observer.addObserver(this, 'domwindowopened', false)
 }
 UCC.prototype = {
@@ -15,6 +16,4 @@ UCC.prototype = {
     win && win.addEventListener('load', this, true),
   handleEvent: function UCC_onDocumentLoad(ev) UC.init(ev.target.defaultView),
 }
-for each(let x in ['Factory', 'Module']) try {
-  this['NSGet'+ x] = XPCOMUtils['generateNSGet'+ x]([UCC])
-} catch([]){}
+var NSGetFactory = XPCOMUtils.generateNSGetFactory([UCC])

@@ -1,4 +1,5 @@
 const {classes: Cc, interfaces: Ci, utils: Cu, results: Cr} = Components
+Cu.import('resource://gre/modules/Services.jsm')
 
 this[this.EXPORTED_SYMBOLS = ['UC']] = {
   URL_MAIN : 'chrome://browser/content/browser.xul',
@@ -22,7 +23,7 @@ this[this.EXPORTED_SYMBOLS = ['UC']] = {
     }},
     __iterator__: function UC_bin_iterator(wk) new Iterator(this, wk),
   }},
-  get main() UC.WindowMediator.getMostRecentWindow('navigator:browser'),
+  get main() Services.wm.getMostRecentWindow('navigator:browser'),
   get paths() JSON.parse(this.prefs.get('paths')),
   set paths(ps) this.prefs.set('paths', JSON.stringify(ps)),
 }
@@ -33,35 +34,9 @@ for(let f in this) if(~f.lastIndexOf('UC_', 0)) UC[f.slice(3)] = this[f]
 
 UC.lazy(function file2url() UC_file2url)
 UC_lazy.call(this, function UC_file2url()
-  UC.IO.getProtocolHandler('file').QueryInterface(Ci.nsIFileProtocolHandler)
+  Services.io.getProtocolHandler('file')
+  .QueryInterface(Ci.nsIFileProtocolHandler)
   .getURLSpecFromFile)
-
-for(let [name, ids] in new Iterator({
-  IO:
-  ['@mozilla.org/network/io-service;1',
-   'nsIIOService'],
-  Console:
-  ['@mozilla.org/consoleservice;1',
-   'nsIConsoleService'],
-  Loader:
-  ['@mozilla.org/moz/jssubscript-loader;1',
-   'mozIJSSubScriptLoader'],
-  Dir:
-  ['@mozilla.org/file/directory_service;1',
-   'nsIProperties'],
-  WindowMediator:
-  ['@mozilla.org/appshell/window-mediator;1',
-   'nsIWindowMediator'],
-  Clipboard:
-  ['@mozilla.org/widget/clipboard;1',
-   'nsIClipboard'],
-  Observer:
-  ['@mozilla.org/observer-service;1',
-   'nsIObserverService'],
-  AppInfo:
-  ['@mozilla.org/xre/app-info;1',
-   'nsIXULRuntime'],
-})) UC.lazy(UC_service, name, ids)
 
 for(let it in new Iterator({
   localFile:
@@ -113,7 +88,8 @@ var CB = UC.clipb = {
     return this
   },
 }
-UC_lazy.call(CB, function service() UC.Clipboard)
+UC_lazy.call(CB, function service()
+  Cc['@mozilla.org/widget/clipboard;1'].getService(Ci.nsIClipboard))
 for(let n in CB.flavors) let(name = n){
   CB.__defineGetter__(name, function CB_get_flavor() this.get(name))
   CB.__defineSetter__(name, function CB_set_flavor(data){
@@ -125,7 +101,7 @@ for(let n in CB.flavors) let(name = n){
 
 function UC_log(){
   if(UC.prefs.get('log'))
-    UC.Console.logStringMessage('uc: ' + Array.join(arguments, ' '))
+    Services.console.logStringMessage('uc: ' + Array.join(arguments, ' '))
   return this
 }
 function UC_trace(e){
@@ -143,7 +119,7 @@ function UC_file2data(file){
   if(data && data.timestamp === lastModifiedTime) return data
   data = {
     timestamp: lastModifiedTime,
-    uri: UC.IO.newURI(UC_file2url(file), null, null),
+    uri: Services.io.newURI(UC_file2url(file), null, null),
     includes: [], excludes: [], requires: [],
   }
   var {fileInputStream: fis, RE_META_PAIR, RE_META_TAIL} = UC
@@ -160,7 +136,7 @@ function UC_file2data(file){
         data[$1 +'s'].push(UC_tester($2))
         continue
       case 'require':
-        data.requires.push(UC.IO.newURI($2, null, data.uri).spec)
+        data.requires.push(Services.io.newURI($2, null, data.uri).spec)
       }
     } else if(RE_META_TAIL.test(line.value)) break
   fis.close()
@@ -177,12 +153,12 @@ function UC_path2file(path){
   } catch(e){ Cu.reportError(e) }
   return null
 }
-function UC_prop2path(q, p) UC.Dir.get(p || q, Ci.nsILocalFile).path
+function UC_prop2path(q, p) Services.dirsvc.get(p || q, Ci.nsILocalFile).path
 
 function UC_init(win){
   try { Cu.evalInSandbox('Components.utils', Cu.Sandbox(win)) }
   catch([]){ return }
-  UC.Loader.loadSubScript('resource://uc/uc.js', win)
+  Services.scriptloader.loadSubScript('resource://uc/uc.js', win)
 }
 function UC_load(win){
   var {href} = win.location, done = this.done = {}, start = Date.now()
@@ -220,9 +196,9 @@ function UC_load(win){
   return this
 }
 function UC_loadJS(url, ctx){
-  try {
-    return UC.Loader.loadSubScript(url, ctx.defaultView || ctx, 'utf-8')
-  } catch(e){
+  try { return Services.scriptloader.loadSubScript
+               (url, ctx.defaultView || ctx, 'utf-8') }
+  catch(e){
     if(e !== 'stop'){
       Cu.reportError(e)
       UC_trace(e)
@@ -236,15 +212,14 @@ function UC_loadXUL(url, ctx){
 }
 function UC_loadCSS(url, ctx){
   var doc = ctx.document || ctx
-  return (
-    doc.contentType == 'application/vnd.mozilla.xul+xml'
+  return doc.contentType == 'application/vnd.mozilla.xul+xml'
     ? doc.insertBefore(
-      doc.createProcessingInstruction(
-        'xml-stylesheet',
-        <_ href={url}/>.toXMLString().slice(3, -2)),
-      doc.documentElement)
+        doc.createProcessingInstruction(
+          'xml-stylesheet',
+          <_ href={url}/>.toXMLString().slice(3, -2)),
+        doc.documentElement)
     : doc.body.appendChild(
-      UC_dom({$: 'link', rel: 'stylesheet', href: url}, doc)))
+        UC_dom({$: 'link', rel: 'stylesheet', href: url}, doc))
 }
 
 function UC_lazy(func, name, args){
@@ -255,11 +230,10 @@ function UC_lazy(func, name, args){
   })
   return me
 }
-function UC_service(c, i) Cc[c].getService(Ci[i])
 function UC_tester(str){
   switch(str){
-  case 'main': return UC.URL_MAIN
-  case '*': return /^/
+  case 'main' : return UC.URL_MAIN
+  case '*'    : return /^/
   }
   if(str[0] == '~') return UC_re(str.slice(1))
   var ss = str.split('*')

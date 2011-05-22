@@ -1,10 +1,12 @@
 'use strict'
 
-Components.utils.import('resource://gre/modules/XPCOMUtils.jsm')
+const Cu = Components.utils
+Cu.import('resource://gre/modules/XPCOMUtils.jsm')
+Cu.import('resource://gre/modules/Services.jsm')
 
 function UCC(){
-  Components.utils.import('resource://uc/uc.jsm')
-  UC.Observer.addObserver(this, 'domwindowopened', false)
+  Cu.import('resource://uc/uc.jsm')
+  Services.obs.addObserver(this, 'domwindowopened', false)
 }
 UCC.prototype = {
   classDescription: 'uc boot',

@@ -298,6 +298,16 @@ function UC_count(o){
   if(o) for([] in new Iterator(o, true)) ++n
   return n
 }
+function UC_once(element, eventType, listener, useCapture) {
+  function once(event) {
+    element.removeEventListener(eventType, once, useCapture)
+    return typeof listener == 'function'
+           ? listener.call(this, event)
+           : listener.handleEvent(event)
+  }
+  element.addEventListener(eventType, once, useCapture)
+  return once
+}
 
 function UC_toString()
   [u +'\n'+ m for([u, m] in new Iterator(this.done || 0))].join('\n\n') ||

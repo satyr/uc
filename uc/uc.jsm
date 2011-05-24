@@ -161,6 +161,9 @@ function UC_init(win){
   Services.scriptloader.loadSubScript('resource://uc/uc.js', win)
 }
 function UC_load(win){
+  var ev = win.document.createEvent('Event')
+  ev.initEvent('ucload', true, true)
+  if(!win.dispatchEvent(ev)) return this
   var {href} = win.location, done = this.done = {}, start = Date.now()
   for(let [path, depth] in new Iterator(UC.paths)) if(depth > 0){
     let file = UC_path2file(path.replace(UC.RE_PATH_PROP, UC_prop2path))

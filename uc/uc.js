@@ -1,6 +1,6 @@
 ({classes: Cc, interfaces: Ci, utils: Cu, results: Cr}) = Components
 
-UC = {__proto__: Cu.import('resource://uc/uc.jsm', null).UC}.load(self)
+;(UC = {__proto__: Cu.import('resource://uc/uc.jsm', null).UC}).load(self)
 
 UC.prefs.get('subwindows') && document.documentElement.addEventListener(
   'DOMContentLoaded', function UC_onContentLoad(ev) UC.init(ev.target), true)

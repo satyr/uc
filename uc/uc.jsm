@@ -187,9 +187,9 @@ function UC_load(win){
     for each(let rurl in data.requires) done[rurl] =
       (rurl in done ? done[rurl] +'\n' : (UC_loadJS(rurl, win), '')) +
       '-> '+ meta.name
-    if(ext == 'XUL')
-      win.setTimeout(UC_loadXUL, meta.delay || UC.DELAY_XUL, spec, win)
-    else UC['load'+ ext](spec, win)
+    ext == 'XUL'
+    ? win.setTimeout(UC_loadXUL, meta.delay || UC.DELAY_XUL, spec, win)
+    : UC['load'+ ext](spec +'?'+ data.timestamp, win)
     done[spec] = meta
   }
   if(UC.prefs.get('log.loaded')){

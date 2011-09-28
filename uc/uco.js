@@ -1,5 +1,6 @@
 const {classes: Cc, interfaces: Ci, utils: Cu, results: Cr} = Components
 Cu.import('resource://uc/uc.jsm')
+Cu.import('resource://gre/modules/Services.jsm')
 
 var plist = [p for(p in new Iterator(UC.paths))]
 var view = {
@@ -78,7 +79,11 @@ function pick(mode){ try{
   var fp = Cc['@mozilla.org/filepicker;1'].createInstance(nsIFilePicker)
   fp.init(window, 'Add Path', nsIFilePicker['mode'+ mode])
   var dir = mode === 'GetFolder'
-  dir || fp.appendFilter('uc JS/XUL/CSS', '*.uc.js;*.uc.xul;*.uc.css')
+  if(!dir){
+    let filter = '*.uc.js;*.uc.xul;*.uc.css'
+    if(Services.appinfo.OS == 'Darwin') filter = filter.replace(/\.uc\./g, '')
+    fp.appendFilter('uc JS/XUL/CSS', filter)
+  }
   if(fp.show() !== nsIFilePicker.returnOK) return
   var ps = []
   if(dir) ps.push([fp.file.path, 1])
@@ -156,12 +161,12 @@ function drop(ev){
 
 function hush(ev)(ev.stopPropagation(), ev.preventDefault(), ev)
 
-function onload(){
+this.onload = function onload(){
   tree = document.getElementById('paths')
   treebox = tree.boxObject
   tree.view = view
 }
 
-function onunload(){
+this.onunload = function onunload(){
   tree.view = null // prevents extra getCellText() calls
 }

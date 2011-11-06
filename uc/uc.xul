@@ -59,7 +59,9 @@
    modifiers="accel,shift" key="c" oncommand="copy(1)"/>
   <key id="key-paste" label="paste"
    modifiers="accel" key="v" oncommand="paste()"/>
-  <key id="key-paste-all" label="paste"
+  <key id="key-paste-all" label="paste all"
    modifiers="accel,shift" key="v" oncommand="paste(1)"/>
+  <key id="key-close" label="close"
+   modifiers="accel" key="w" oncommand="close()"/>
  </keyset>
 </dialog>

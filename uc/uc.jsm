@@ -156,9 +156,8 @@ function UC_path2file(path){
 function UC_prop2path(q, p) Services.dirsvc.get(p || q, Ci.nsILocalFile).path
 
 function UC_init(win){
-  try { Cu.evalInSandbox('Components.utils', Cu.Sandbox(win)) }
-  catch([]){ return }
-  Services.scriptloader.loadSubScript('resource://uc/uc.js', win)
+  if(win instanceof Ci.nsIDOMChromeWindow)
+    Services.scriptloader.loadSubScript('resource://uc/uc.js', win)
 }
 function UC_load(win){
   var ev = win.document.createEvent('Event')

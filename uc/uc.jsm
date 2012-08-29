@@ -16,11 +16,6 @@ this[this.EXPORTED_SYMBOLS = ['UC']] = {
   NS_XUL : 'http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul',
   bin: {__proto__: {
     toString: Object.prototype.toSource,
-    valueOf: function UC_bin_valueOf(hint){ switch(hint){
-      case 'object'   : return this
-      case 'number'   : return UC_count(this)
-      case 'undefined': return [p for(p in this)].join('\n')
-    }},
     __iterator__: function UC_bin_iterator(wk) new Iterator(this, wk),
   }},
   get main() Services.wm.getMostRecentWindow('navigator:browser'),
@@ -218,7 +213,7 @@ function UC_loadCSS(url, ctx){
     ? doc.insertBefore(
         doc.createProcessingInstruction(
           'xml-stylesheet',
-          <_ href={url}/>.toXMLString().slice(3, -2)),
+          'href="'+ UC_hescape(url) +'"'),
         doc.documentElement)
     : doc.body.appendChild(
         UC_dom({$: 'link', rel: 'stylesheet', href: url}, doc))
@@ -256,6 +251,15 @@ function UC_re(pattern, flags){
   }
 }
 function UC_rescape(str) String(str).replace(UC.RE_SCAPE, '\\$&')
+function UC_hescape(str) String(str).replace(/[&<>"']/g, function($){
+  switch ($) {
+    case "&": return "&amp;";
+    case "<": return "&lt;";
+    case ">": return "&gt;";
+    case '"': return "&quot;";
+    case "'": return "&#39;";
+  }
+})
 function UC_sort(arr, key, dsc){
   var pry = (
     typeof key == 'function' ? key :

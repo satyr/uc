@@ -285,7 +285,7 @@ function UC_dom(obj, ctx){
   }
   if(obj.$){
     let lm = doc.createElement(obj.$)
-    for(let k in new Iterator(obj, true)) switch(k){
+    for(let k in obj) switch(k){
       case '$': break
       case '_': lm.appendChild(UC_dom(obj[k], lm)); break
       default: lm.setAttribute(k, obj[k])
@@ -293,7 +293,7 @@ function UC_dom(obj, ctx){
     return lm
   }
   let df = doc.createDocumentFragment()
-  for each(let v in obj) df.appendChild(UC_dom(v, ctx))
+  for(let v of obj) df.appendChild(UC_dom(v, ctx))
   return df
 }
 function UC_count(o){

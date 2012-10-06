@@ -59,19 +59,20 @@ var CB = UC.clipb = {
       if(!service.hasDataMatchingFlavors([flavor], 1, kGlobalClipboard))
         return ''
       var trans = UC.transferable, data = {}
+      'init' in trans && trans.init(null)
       trans.addDataFlavor(flavor)
       service.getData(trans, kGlobalClipboard)
       trans.getTransferData(flavor, data, {})
       return data.value.QueryInterface(Ci.nsISupportsString).data
     }
-    return (
-      arguments.length > 1
-      ? Array.map(arguments, get)
-      : flavor.map ? flavor.map(get) : get(flavor))
+    return arguments.length > 1
+           ? Array.map(arguments, get)
+           : flavor.map ? flavor.map(get) : get(flavor)
   },
   set: function CB_set(dict){
     const {service, flavors} = CB
     var trans = UC.transferable
+    'init' in trans && trans.init(null)
     for(let [flavor, data] in new Iterator(dict)){
       let ss = Cc['@mozilla.org/supports-string;1']
                .createInstance(Ci.nsISupportsString)

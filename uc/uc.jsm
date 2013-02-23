@@ -19,11 +19,9 @@ this[this.EXPORTED_SYMBOLS = ['UC']] = {
     __iterator__: function UC_bin_iterator(wk) new Iterator(this, wk),
   }},
   get main() Services.wm.getMostRecentWindow('navigator:browser'),
-  get paths() JSON.parse(this.prefs.get('paths')),
-  set paths(ps) this.prefs.set('paths', JSON.stringify(ps)),
+  get paths() JSON.parse(this.pget('extensions.uc.paths')),
+  set paths(ps) this.pset('extensions.uc.paths', JSON.stringify(ps)),
 }
-Cu.import('resource://uc/prefs.jsm', UC)
-UC.prefs = new UC.Preferences('extensions.uc.')
 
 for(let f in this) if(~f.lastIndexOf('UC_', 0)) UC[f.slice(3)] = this[f]
 
@@ -96,12 +94,12 @@ for(let n in CB.flavors) let(name = n){
 }
 
 function UC_log(){
-  if(UC.prefs.get('log'))
+  UC_pget('extensions.uc.log') &&
     Services.console.logStringMessage('uc: ' + Array.join(arguments, ' '))
   return this
 }
 function UC_trace(e){
-  if(!e || !UC.prefs.get('log.trace')) return this
+  if(!e || !UC_pget('extensions.uc.log.trace')) return this
   if(e instanceof Ci.nsIException){
     for(var t = '', l = e.location; l; l = l.caller) t += l +'\n'
     t = t.replace(/^JS frame :: (?:.+ -> )?/mg, '')
@@ -187,7 +185,7 @@ function UC_load(win){
     : UC['load'+ ext](spec +'?'+ data.timestamp, win)
     done[spec] = meta
   }
-  if(UC.prefs.get('log.loaded')){
+  if(UC_pget('extensions.uc.log.loaded')){
     let list = [m.name || u +'\n'+ m for([u, m] in new Iterator(done))]
     list.length && UC_log(href, Date.now() - start + 'ms\n'+ list.join('\n'))
   }
@@ -242,6 +240,29 @@ function UC_options(){
   var uc = UC.main.openDialog('chrome://uc/content', 'uc')
   uc.focus()
   return uc
+}
+function UC_pget(key){
+  var {prefs} = Services
+  switch(prefs.getPrefType(key)){
+  case prefs.PREF_STRING:
+    return prefs.getComplexValue(key, Ci.nsISupportsString).data
+  case prefs.PREF_BOOL:
+    return prefs.getBoolPref(key)
+  case prefs.PREF_INT:
+    return prefs.getIntPref(key)
+  }
+}
+function UC_pset(key, val){
+  switch(typeof val){
+  case 'boolean' : Services.prefs.setBoolPref (key, val); break
+  case 'number'  : Services.prefs.setIntPref  (key, val); break
+  default:
+    let ss = Cc['@mozilla.org/supports-string;1']
+             .createInstance(Ci.nsISupportsString)
+    ss.data = val
+    Services.prefs.setComplexValue(key, Ci.nsISupportsString, ss)
+  }
+  return val
 }
 
 function UC_re(pattern, flags){

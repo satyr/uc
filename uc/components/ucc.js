@@ -16,6 +16,8 @@ UCC.prototype = {
   _xpcom_categories: [{category: 'profile-after-change'}],
   observe: function UCC_onWindowOpen(win)
     win && win.addEventListener('load', this, true),
-  handleEvent: function UCC_onDocumentLoad(ev) UC.init(ev.target.defaultView),
+  handleEvent: function UCC_onDocumentLoad(ev){
+    UC.init(ev.target.defaultView)
+  },
 }
 var NSGetFactory = XPCOMUtils.generateNSGetFactory([UCC])

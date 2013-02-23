@@ -3,7 +3,7 @@
  ><Description about="urn:mozilla:install-manifest"
  m:id="uc@satyr.github.com"
  m:name="uc"
- m:version="20120903"
+ m:version="20130223"
  m:creator="satyr"
  m:description="userChromeJS + subscriptoverlayloader.js + ?"
  m:iconURL="chrome://uc/content/chrome/icons/default/uc.ico"
@@ -11,6 +11,6 @@
  m:homepageURL="http://github.com/satyr/uc"
  ><m:targetApplication><!--Firefox--><Description
    m:id="{ec8030f7-c20a-464f-9b0e-13a3a9e97384}"
-   m:minVersion="15.0"
-   m:maxVersion="18.0a1"
+   m:minVersion="16.0"
+   m:maxVersion="21.0a1"
    /></m:targetApplication></Description></RDF>

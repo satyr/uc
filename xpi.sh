@@ -1,2 +1,3 @@
 #!/bin/sh
-zip uc.xpi $(git ls-files uc)
+cd uc
+zip ../uc.xpi $(git ls-files .)

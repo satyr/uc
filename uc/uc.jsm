@@ -1,5 +1,6 @@
 const {classes: Cc, interfaces: Ci, utils: Cu, results: Cr} = Components
 Cu.import('resource://gre/modules/Services.jsm')
+Cu.import('resource://gre/modules/PrivateBrowsingUtils.jsm')
 
 this[this.EXPORTED_SYMBOLS = ['UC']] = {
   URL_MAIN : 'chrome://browser/content/browser.xul',
@@ -47,19 +48,20 @@ for(let it in new Iterator({
   UC.__defineGetter__(name, function UC_i() cid.createInstance(iid))
 }
 
-var CB = UC.clipb = {
+var clip = UC.clip = {
   flavors: {text: 'text/unicode', html: 'text/html'},
-  get: function CB_get(flavor){
-    const {service, flavors} = CB
-    const {kGlobalClipboard} = service
+  get: function clip_get(flavor, context){
+    const {clipboard: service} = Services
+    if(context instanceof Ci.nsIDOMWindow)
+      context = PrivateBrowsingUtils.getPrivacyContextFromWindow(context)
     function get(flavor){
-      flavor = flavors[flavor] || flavor
-      if(!service.hasDataMatchingFlavors([flavor], 1, kGlobalClipboard))
+      flavor = clip.flavors[flavor] || flavor
+      if(!service.hasDataMatchingFlavors([flavor], 1, service.kGlobalClipboard))
         return ''
       var trans = UC.transferable, data = {}
-      'init' in trans && trans.init(null)
+      trans.init(context)
       trans.addDataFlavor(flavor)
-      service.getData(trans, kGlobalClipboard)
+      service.getData(trans, service.kGlobalClipboard)
       trans.getTransferData(flavor, data, {})
       return data.value.QueryInterface(Ci.nsISupportsString).data
     }
@@ -67,26 +69,27 @@ var CB = UC.clipb = {
            ? Array.map(arguments, get)
            : flavor.map ? flavor.map(get) : get(flavor)
   },
-  set: function CB_set(dict){
-    const {service, flavors} = CB
+  set: function CB_set(dict, context){
+    const {clipboard: service} = Services
+    if(context instanceof Ci.nsIDOMWindow)
+      context = PrivateBrowsingUtils.getPrivacyContextFromWindow(context)
     var trans = UC.transferable
-    'init' in trans && trans.init(null)
+    trans.init(context)
     for(let [flavor, data] in new Iterator(dict)){
       let ss = Cc['@mozilla.org/supports-string;1']
                .createInstance(Ci.nsISupportsString)
       ss.data = data = String(data)
-      trans.addDataFlavor(flavor = flavors[flavor] || flavor)
+      trans.addDataFlavor(flavor = clip.flavors[flavor] || flavor)
       trans.setTransferData(flavor, ss, data.length * 2)
     }
     service.setData(trans, null, service.kGlobalClipboard)
     return this
   },
 }
-UC_lazy.call(CB, function service()
-  Cc['@mozilla.org/widget/clipboard;1'].getService(Ci.nsIClipboard))
-for(let n in CB.flavors) let(name = n){
-  CB.__defineGetter__(name, function CB_get_flavor() this.get(name))
-  CB.__defineSetter__(name, function CB_set_flavor(data){
+for(let n in clip.flavors){
+  let name = n
+  clip.__defineGetter__(name, function clip_get_x() this.get(name))
+  clip.__defineSetter__(name, function clip_set_x(data){
     var dict = {}
     dict[name] = data
     this.set(dict)

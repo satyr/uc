@@ -50,7 +50,7 @@ function remove(row){ try {
   if(row < 0) return
   plist.splice(row, 1)
   treebox.rowCountChanged(row, -1)
-  view.selection.select(row - 1)
+  view.selection.select(row && row - 1)
 } catch(e){ Cu.reportError(e) }
 }
 function move(up){
@@ -71,7 +71,7 @@ function edit(shift){
 }
 function save(){
   var paths = {}, re = /[/\\]$/
-  for each(let [k, v] in plist) if(k) paths[k.trim().replace(re, '')] = v & 15
+  for(let [k, v] of plist) if(k) paths[k.trim().replace(re, '')] = v & 15
   UC.paths = paths
 }
 function pick(mode){ try{
@@ -97,17 +97,17 @@ function pick(mode){ try{
 }
 function copy(all){
   if(all){
-    UC.clipb.text = [path for each([path] in plist)].join('\n')
+    UC.clip.text = [path for([path] of plist)].join('\n')
     return
   }
   var row = tree.currentIndex
-  if(~row) UC.clipb.text = plist[row][0]
+  if(~row) UC.clip.text = plist[row][0]
 }
 function paste(all){
-  var txt = UC.clipb.text.trim()
+  var txt = UC.clip.text.trim()
   if(!txt) return
   if(all){
-    add([[path, 1] for each(path in txt.split(/[\r\n]+/))])
+    add([[path, 1] for(path of txt.split(/[\r\n]+/))])
     return
   }
   var row = tree.currentIndex

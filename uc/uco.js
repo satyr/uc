@@ -16,10 +16,10 @@ var view = {
   isSorted: function() false,
   getLevel: function() 0,
   getImageSrc: function() null,
-  getRowProperties: function(){},
   getParentIndex: function() -1,
-  getCellProperties: function(row, col, props){},
-  getColumnProperties: function(){},
+  getRowProperties: function() '',
+  getCellProperties: function() '',
+  getColumnProperties: function() '',
   selectionChanged: function(){},
   cycleHeader: function cycleHeader(col){
     var lmn = col.element

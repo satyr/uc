@@ -42,7 +42,8 @@ for(let it in new Iterator({
   transferable:
   ['@mozilla.org/widget/transferable;1',
    'nsITransferable'],
-})) let([name, [cid, iid]] = it){
+})) {
+  let [name, [cid, iid]] = it
   cid = Cc[cid]
   iid = Ci[iid]
   UC.__defineGetter__(name, function UC_i() cid.createInstance(iid))

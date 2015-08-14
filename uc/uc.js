@@ -1,6 +1,7 @@
-({classes: Cc, interfaces: Ci, utils: Cu, results: Cr}) = Components
+var {classes: Cc, interfaces: Ci, utils: Cu, results: Cr} = Components
+  , UC = Object.create(Cu.import('resource://uc/uc.jsm', null).UC)
 
-;(UC = {__proto__: Cu.import('resource://uc/uc.jsm', null).UC}).load(self)
+UC.load(self)
 
 UC.pget('extensions.uc.subwindows') &&
 document.documentElement.addEventListener(

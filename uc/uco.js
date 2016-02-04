@@ -2,24 +2,30 @@ const {classes: Cc, interfaces: Ci, utils: Cu, results: Cr} = Components
 Cu.import('resource://uc/uc.jsm')
 Cu.import('resource://gre/modules/Services.jsm')
 
-var plist = [p for(p in new Iterator(UC.paths))]
+var plist = [...new Iterator(UC.paths)]
 var view = {
-  setTree: function(treebox){ this.treebox = treebox },
-  get rowCount() plist.length,
-  getCellText: function(row, col) plist[row][col.index],
+  setTree: function(treebox){
+    this.treebox = treebox
+  },
+  get rowCount(){
+    return plist.length
+  },
+  getCellText: function(row, col){
+    return plist[row][col.index]
+  },
   setCellText: function(row, col, txt){
     plist[row][col.index] = txt.trim()
   },
-  isEditable: function() true,
-  isContainer: function() false,
-  isSeparator: function() false,
-  isSorted: function() false,
-  getLevel: function() 0,
-  getImageSrc: function() null,
-  getParentIndex: function() -1,
-  getRowProperties: function() '',
-  getCellProperties: function() '',
-  getColumnProperties: function() '',
+  isEditable          : () => true,
+  isContainer         : () => false,
+  isSeparator         : () => false,
+  isSorted            : () => false,
+  getLevel            : () => 0,
+  getImageSrc         : () => null,
+  getParentIndex      : () => -1,
+  getRowProperties    : () => '',
+  getCellProperties   : () => '',
+  getColumnProperties : () => '',
   selectionChanged: function(){},
   cycleHeader: function cycleHeader(col){
     var lmn = col.element
@@ -30,8 +36,8 @@ var view = {
     UC.sort(plist, col.index, sd === 'descending')
     treebox.invalidate()
   },
-  canDrop: function(row, orient, dataTransfer) false,
-  drop: function(row, orient, dataTransfer) false,
+  canDrop : (row, orient, dataTransfer) => false,
+  drop    : (row, orient, dataTransfer) => false,
 }
 
 function add(ps, cb){
@@ -97,7 +103,7 @@ function pick(mode){ try{
 }
 function copy(all){
   if(all){
-    UC.clip.text = [path for([path] of plist)].join('\n')
+    UC.clip.text = plist.map(([p]) => p).join('\n')
     return
   }
   var row = tree.currentIndex
@@ -107,7 +113,7 @@ function paste(all){
   var txt = UC.clip.text.trim()
   if(!txt) return
   if(all){
-    add([[path, 1] for(path of txt.split(/[\r\n]+/))])
+    add([for(path of txt.split(/[\r\n]+/)) [path, 1]])
     return
   }
   var row = tree.currentIndex
@@ -149,7 +155,9 @@ function dblclick(){
   if(tree.editingColumn) return
   add(0, edit)
 }
-function drag(ev) ev.dataTransfer.types.contains('application/x-moz-file')
+function drag(ev){
+  return ev.dataTransfer.types.contains('application/x-moz-file')
+}
 function drop(ev){
   var dt = ev.dataTransfer, ps = []
   for(let i = 0, c = dt.mozItemCount; i < c; ++i){
@@ -159,7 +167,11 @@ function drop(ev){
   add(ps)
 }
 
-function hush(ev)(ev.stopPropagation(), ev.preventDefault(), ev)
+function hush(ev){
+  ev.stopPropagation()
+  ev.preventDefault()
+  return ev
+}
 
 this.onload = function onload(){
   tree = document.getElementById('paths')

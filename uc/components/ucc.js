@@ -14,8 +14,9 @@ UCC.prototype = {
   contractID: '@u/c;1',
   QueryInterface: XPCOMUtils.generateQI([]),
   _xpcom_categories: [{category: 'profile-after-change'}],
-  observe: function UCC_onWindowOpen(win)
-    win && win.addEventListener('load', this, true),
+  observe: function UCC_onWindowOpen(win){
+    win && win.addEventListener('load', this, true)
+  },
   handleEvent: function UCC_onDocumentLoad(ev){
     UC.init(ev.target.defaultView)
   },

@@ -17,20 +17,26 @@ this[this.EXPORTED_SYMBOLS = ['UC']] = {
   NS_XUL : 'http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul',
   bin: {__proto__: {
     toString: Object.prototype.toSource,
-    __iterator__: function UC_bin_iterator(wk) new Iterator(this, wk),
   }},
-  get main() Services.wm.getMostRecentWindow('navigator:browser'),
-  get paths() JSON.parse(this.pget('extensions.uc.paths')),
-  set paths(ps) this.pset('extensions.uc.paths', JSON.stringify(ps)),
+  get main(){
+    return Services.wm.getMostRecentWindow('navigator:browser')
+  },
+  get paths(){
+    return JSON.parse(this.pget('extensions.uc.paths'))
+  },
+  set paths(ps){
+    return this.pset('extensions.uc.paths', JSON.stringify(ps))
+  },
 }
 
 for(let f in this) if(~f.lastIndexOf('UC_', 0)) UC[f.slice(3)] = this[f]
 
-UC.lazy(function file2url() UC_file2url)
-UC_lazy.call(this, function UC_file2url()
-  Services.io.getProtocolHandler('file')
-  .QueryInterface(Ci.nsIFileProtocolHandler)
-  .getURLSpecFromFile)
+UC.lazy(function file2url(){ return UC_file2url })
+UC_lazy.call(this, function UC_file2url(){
+  return Services.io.getProtocolHandler('file')
+         .QueryInterface(Ci.nsIFileProtocolHandler)
+         .getURLSpecFromFile
+})
 
 for(let it in new Iterator({
   localFile:
@@ -46,7 +52,7 @@ for(let it in new Iterator({
   let [name, [cid, iid]] = it
   cid = Cc[cid]
   iid = Ci[iid]
-  UC.__defineGetter__(name, function UC_i() cid.createInstance(iid))
+  UC.__defineGetter__(name, () => cid.createInstance(iid))
 }
 
 var clip = UC.clip = {
@@ -89,17 +95,19 @@ var clip = UC.clip = {
 }
 for(let n in clip.flavors){
   let name = n
-  clip.__defineGetter__(name, function clip_get_x() this.get(name))
-  clip.__defineSetter__(name, function clip_set_x(data){
-    var dict = {}
-    dict[name] = data
-    this.set(dict)
+  Object.defineProperty(clip, name, {
+    get: function clip_get_x(){ return this.get(name) },
+    set: function clip_set_x(data){
+      var dict = {}
+      dict[name] = data
+      this.set(dict)
+    },
   })
 }
 
 function UC_log(){
   UC_pget('extensions.uc.log') &&
-    Services.console.logStringMessage('uc: ' + Array.join(arguments, ' '))
+    Services.console.logStringMessage('uc: ' + Array.join(arguments, '|'))
   return this
 }
 function UC_trace(e){
@@ -151,8 +159,9 @@ function UC_path2file(path){
   } catch(e){ Cu.reportError(e) }
   return null
 }
-function UC_prop2path(q, p) Services.dirsvc.get(p || q, Ci.nsILocalFile).path
-
+function UC_prop2path(q, p){
+  return Services.dirsvc.get(p || q, Ci.nsILocalFile).path
+}
 function UC_init(win){
   if(win instanceof Ci.nsIDOMChromeWindow)
     Services.scriptloader.loadSubScript('resource://uc/uc.js', win)
@@ -173,7 +182,9 @@ function UC_load(win){
     while(files.hasMoreElements())
       march(files.getNext().QueryInterface(Ci.nsILocalFile), depth - 1)
   }
-  function match(url) url.test ? url.test(this) : url == this
+  function match(url){
+    return url.test ? url.test(this) : url == this
+  }
   function touch(file){
     if(file.isDirectory() || !UC.RE_FILE_EXT.test(file.leafName)) return
     var ext = RegExp.$1.toUpperCase(), data = UC_file2data(file)
@@ -190,7 +201,7 @@ function UC_load(win){
     done[spec] = meta
   }
   if(UC_pget('extensions.uc.log.loaded')){
-    let list = [m.name || u +'\n'+ m for([u, m] in new Iterator(done))]
+    let list = Object.keys(done).map(u => done[u].name || u +'\n'+ done[u])
     list.length && UC_log(href, Date.now() - start + 'ms\n'+ list.join('\n'))
   }
   return this
@@ -276,26 +287,31 @@ function UC_re(pattern, flags){
     return RegExp(UC_rescape(pattern), flags)
   }
 }
-function UC_rescape(str) String(str).replace(UC.RE_SCAPE, '\\$&')
-function UC_hescape(str) String(str).replace(/[&<>"']/g, function($){
-  switch ($) {
-    case "&": return "&amp;";
-    case "<": return "&lt;";
-    case ">": return "&gt;";
-    case '"': return "&quot;";
-    case "'": return "&#39;";
-  }
-})
+function UC_rescape(str){
+  return String(str).replace(UC.RE_SCAPE, '\\$&')
+}
+function UC_hescape(str){
+  return String(str).replace(/[&<>"']/g, $ => {
+    switch($){
+      case "&": return "&amp;"
+      case "<": return "&lt;"
+      case ">": return "&gt;"
+      case '"': return "&quot;"
+      case "'": return "&#39;"
+    }
+  })
+}
 function UC_sort(arr, key, dsc){
-  var pry = (
-    typeof key == 'function' ? key :
-    key != null
-    ? function pry(x) x[key]
-    : function idt(x) x)
-  var sorted = [{k: pry(x), v: x} for each(x in Array.slice(arr))].sort(
+  var pry = typeof key == 'function'
+    ? key
+    : key != null
+      ? x => x[key]
+      : x => x
+  var sorted = [for(x of Array.slice(arr)) {k: pry(x), v: x}].sort(
     dsc
-    ? function dsc(a, b) a.k < b.k
-    : function asc(a, b) a.k > b.k)
+    ? (a, b) => a.k < b.k
+    : (a, b) => a.k > b.k
+  )
   for(let i in sorted) arr[i] = sorted[i].v
   return arr
 }
@@ -338,15 +354,17 @@ function UC_once(element, eventType, listener, useCapture) {
   return once
 }
 
-function UC_toString()
-  [u +'\n'+ m for([u, m] in new Iterator(this.done || 0))].join('\n\n') ||
-  '[object UC]'
+function UC_toString(){
+  return [...new Iterator(this.done || 0)]
+         .map(um => um.join('\n')).join('\n\n')
+      || '[object UC]'
+}
 
 function Meta(){}
 Meta.prototype.toString = function Meta_toString(tab){
   if(tab == null) tab = ' '
   var s = this.name, re = /^/mg
-  for(let [k, v] in new Iterator(this)) if(k !== 'name')
+  for(let [k, v] of new Iterator(this)) if(k !== 'name')
      s += '\n@'+ k +'\n'+ v.replace(re, tab)
   return s
 }
